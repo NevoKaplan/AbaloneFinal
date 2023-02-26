@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/play_fragment_layout"
+    android:background="@drawable/gradient_background_variation"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    tools:context=".play.ChooseActivity">
+
+    <HorizontalScrollView
+        android:id="@+id/BoardsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="boards list"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/shuffle"
+                android:layout_width="60dp"
+                android:layout_height="48dp"
+                android:src="@drawable/shuffle"
+                app:layout_constraintBottom_toTopOf="@+id/board6"
+                app:layout_constraintEnd_toStartOf="@+id/board2"
+                app:layout_constraintStart_toEndOf="@+id/board1"
+                app:layout_constraintTop_toBottomOf="@+id/board2"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageView
+                android:id="@+id/board1"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/empty_board_hor"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageView
+                android:id="@+id/board2"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+                android:layout_marginStart="50dp"
+                app:layout_constraintStart_toEndOf="@+id/board1"
+                app:layout_constraintTop_toTopOf="@+id/board1"
+                app:srcCompat="@drawable/empty_board_hor"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageView
+                android:id="@+id/board3"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+                android:layout_marginStart="50dp"
+                app:layout_constraintStart_toEndOf="@+id/board2"
+                app:layout_constraintTop_toTopOf="@+id/board2"
+                app:srcCompat="@drawable/empty_board_hor" />
+
+            <ImageView
+                android:id="@+id/board4"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+                android:layout_marginStart="50dp"
+                app:layout_constraintStart_toEndOf="@+id/board3"
+                app:layout_constraintTop_toTopOf="@+id/board3"
+                app:srcCompat="@drawable/empty_board_hor" />
+
+            <ImageView
+                android:id="@+id/board5"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+                android:layout_marginTop="30dp"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/board1"
+                app:srcCompat="@drawable/empty_board_hor"
+                tools:ignore="SpeakableTextPresentCheck,ImageContrastCheck" />
+
+            <ImageView
+                android:id="@+id/board6"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+
+                android:layout_marginStart="50dp"
+                app:layout_constraintStart_toEndOf="@+id/board5"
+                app:layout_constraintTop_toTopOf="@+id/board5"
+                app:srcCompat="@drawable/empty_board_hor"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageView
+                android:id="@+id/board7"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+
+                android:layout_marginStart="50dp"
+                app:layout_constraintStart_toEndOf="@+id/board6"
+                app:layout_constraintTop_toTopOf="@+id/board6"
+                app:srcCompat="@drawable/empty_board_hor" />
+
+            <ImageView
+                android:id="@+id/board8"
+                android:layout_width="193dp"
+                android:layout_height="193dp"
+                android:layout_marginStart="50dp"
+                app:layout_constraintStart_toEndOf="@+id/board7"
+                app:layout_constraintTop_toTopOf="@+id/board7"
+                app:srcCompat="@drawable/empty_board_hor" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </HorizontalScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTop"
+        android:layout_width="172dp"
+        android:layout_height="70dp"
+        app:layout_constraintBottom_toTopOf="@+id/BoardsScroll"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.6" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewBottom"
+        android:layout_width="172dp"
+        android:layout_height="70dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/BoardsScroll"
+        app:layout_constraintVertical_bias="0.4" />
+
+    <ImageView
+        android:id="@+id/topRightArrow"
+        android:layout_width="45dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerViewTop"
+        app:layout_constraintStart_toEndOf="@+id/recyclerViewTop"
+        app:layout_constraintTop_toTopOf="@+id/recyclerViewTop"
+        app:srcCompat="@drawable/arrow_final_shaded" />
+
+    <ImageView
+        android:id="@+id/topLeftArrow"
+        android:layout_width="45dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
+        android:rotation="180"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerViewTop"
+        app:layout_constraintEnd_toStartOf="@+id/recyclerViewTop"
+        app:layout_constraintTop_toTopOf="@+id/recyclerViewTop"
+        app:srcCompat="@drawable/arrow_final_shaded" />
+
+    <ImageView
+        android:id="@+id/bottomLeftArrow"
+        android:layout_width="45dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
+        android:rotation="180"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerViewBottom"
+        app:layout_constraintEnd_toStartOf="@+id/recyclerViewBottom"
+        app:layout_constraintTop_toTopOf="@+id/recyclerViewBottom"
+        app:srcCompat="@drawable/arrow_final_shaded" />
+
+    <ImageView
+        android:id="@+id/bottomRightArrow"
+        android:layout_width="45dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerViewBottom"
+        app:layout_constraintStart_toEndOf="@+id/recyclerViewBottom"
+        app:layout_constraintTop_toTopOf="@+id/recyclerViewBottom"
+        app:srcCompat="@drawable/arrow_final_shaded" />
+
+    <ImageView
+        android:id="@+id/menu"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.95"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.02"
+        app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
