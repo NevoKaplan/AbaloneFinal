@@ -1,6 +1,9 @@
 package com.example.abalone.play;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -25,6 +29,7 @@ import com.example.abalone.play.Logic.Board;
 import com.example.abalone.play.Logic.Stone;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.StringTokenizer;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -49,21 +54,42 @@ public class GameActivity extends AppCompatActivity {
 
     private static final int YOffset = 100;
 
+    private SharedPreferences sharedPref;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_layout);
 
         Intent received = getIntent();
         Bundle bundle = received.getBundleExtra("bundle") ; //getArguments();
-        control = Control.getInstance(bundle.getInt("layoutNum", 1), this);
-        bluePiece = ContextCompat.getDrawable(this, bundle.getInt("bluePiece", R.drawable.marble_blue));
-        redPiece = ContextCompat.getDrawable(this, bundle.getInt("redPiece", R.drawable.marble_red));
+        if (bundle == null)
+            bundle = new Bundle();
+        control = Control.createInstance(bundle.getInt("layoutNum", 1), this);
+        int bluePieceInt = bundle.getInt("bluePiece", R.drawable.marble_blue);
+        bluePiece = ContextCompat.getDrawable(this, bluePieceInt);
+        int redPieceInt = bundle.getInt("redPiece", R.drawable.marble_red);
+        redPiece = ContextCompat.getDrawable(this, redPieceInt);
         empty_space = ContextCompat.getDrawable(this, R.drawable.empty_space);
         board = control.getBoard();
         preRemovedBlue = board.deadBlue;
         preRemovedRed = board.deadRed;
         hndlr = new MyHandler();
         //onConfigurationChanged(this.getResources().getConfiguration());
+
+        sharedPref = getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
+
+        // if should use previously saved board state
+        if (received.getBooleanExtra(getString(R.string.use_saved_board), false)) {
+            // do use
+            setUpBoardFromSavedState();
+        }
+        else {
+            // don't use
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt("bluePiece", bluePieceInt);
+            editor.putInt("redPiece", redPieceInt);
+            editor.apply();
+        }
 
         int screenWidth = getScreenWidth(), size = screenWidth - (int)(screenWidth * 0.02);
         ImageView background = findViewById(R.id.gridFrame);
@@ -84,6 +110,36 @@ public class GameActivity extends AppCompatActivity {
             removedPieces[i] = new ArrayList<>();
 
         AiTurn = false;
+    }
+
+    private void setUpBoardFromSavedState() {
+        String savedString = sharedPref.getString(getString(R.string.saved_board_state), getString(R.string.no_board_state));
+        StringTokenizer st = new StringTokenizer(savedString, ",");
+        int[][] savedList = new int[9][9];
+        for (int i = 0; i < savedList.length; i++) {
+            for (int j = 0; j < savedList[i].length; j++) {
+                savedList[i][j] = Integer.parseInt(st.nextToken());
+            }
+        }
+        control.buildCustomBoard(savedList, sharedPref.getInt("currentPlayer", 1));
+        AiTurn = sharedPref.getBoolean("AiTurn", false);
+        bluePiece = ContextCompat.getDrawable(this, sharedPref.getInt("bluePiece", R.drawable.marble_blue));
+        redPiece = ContextCompat.getDrawable(this, sharedPref.getInt("redPiece", R.drawable.marble_red));
+    }
+
+    private void saveCurrentBoardState() {
+        int[][] list = control.getBoardAsInt();
+        StringBuilder str = new StringBuilder();
+        for (int[] ints : list) {
+            for (int anInt : ints) {
+                str.append(anInt).append(",");
+            }
+        }
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.saved_board_state), str.toString());
+        editor.putBoolean("AiTurn", AiTurn);
+        editor.putInt("currentPlayer", board.getPlayer());
+        editor.apply();
     }
 
 
@@ -205,7 +261,6 @@ public class GameActivity extends AppCompatActivity {
         // creates infinite loop after AI turn - need to fix
         updateBoard();
         changePlayerImage(board.getPlayer() * -1);
-        System.out.println("Here And Now, current player: " + board.getPlayer());
         if (control.hasAiInstance()) {
             //changePlayerImage(board.getPlayer() * -1);
             AiTurn = !AiTurn;
@@ -214,7 +269,8 @@ public class GameActivity extends AppCompatActivity {
             updateBoard();
             changePlayerImage(board.getPlayer());
         }
-        System.out.println("Here And Now 2, current player: " + board.getPlayer());
+        saveCurrentBoardState();
+        checkWin();
     }
 
     private void checkToAdd(int preRed, int preBlue, int red, int blue) {
@@ -422,7 +478,6 @@ public class GameActivity extends AppCompatActivity {
         }
         layout.addView(imageView);
         layout.requestLayout();
-        checkWin();
     }
 
     public void makeTroopsInvisible(ArrayList<Stone> selected, ArrayList<Stone> toBe) {
@@ -461,7 +516,32 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void showWin(int player) {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.saved_board_state), getString(R.string.no_board_state));
+        editor.apply();
 
+        String winText;
+
+        // need to change:
+        if (player == 1)
+            winText = "Blue Won!!";
+        else
+            winText = "Red Won!!";
+        // end of need to change
+
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_win_dialog);
+        dialog.setTitle(winText);
+        dialog.findViewById(R.id.gloryButton).setOnClickListener(this::endActivity);
+        ((TextView)dialog.findViewById(R.id.winText)).setText(winText);
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    private void endActivity(View view) {
+        Intent intent = new Intent(this, ChooseActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void changePlayerImage(int player) {

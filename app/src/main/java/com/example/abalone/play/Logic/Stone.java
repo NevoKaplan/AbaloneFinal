@@ -81,4 +81,9 @@ public class Stone {
         return new int[]{this.row, this.col};
     }
 
+    public void setBothNums(int num) {
+        this.mainNum = num;
+        this.ogNum = num;
+    }
+
 }

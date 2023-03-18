@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Abalone</string>
+    <string name="use_saved_board">use_saved_board</string>
+    <string name="saved_board_state">saved_board_state</string>
+    <string name="no_board_state">no_board_state</string>
 </resources>

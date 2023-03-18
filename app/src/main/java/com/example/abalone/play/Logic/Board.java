@@ -28,7 +28,13 @@ public class Board {
     protected boolean AiTurn;
 
     // get player
-    public int getPlayer() { return this.player; }
+    public int getPlayer() {
+        return this.player;
+    }
+
+    public void setPlayer(int p) {
+        this.player = p;
+    }
 
     // creates the board
     public Board(boolean first, int num) {
@@ -117,13 +123,22 @@ public class Board {
         }
     }
 
-    private void organize(int[][] placeAcc) {
+    public void organize(int[][] placeAcc) {
         for (int i = 0; i < placeAcc.length; i++) {
             for (int j = 0; j < placeAcc[i].length; j++) {
-                hex[i][j].setMainNum(placeAcc[i][j]);
-                hex[i][j].setOgNum(placeAcc[i][j]);
+                hex[i][j].setBothNums(placeAcc[i][j]);
             }
         }
+    }
+
+    public int[][] turnStoneToIntArr() {
+        int[][] newHex = new int[9][9];
+        for (int i = 0; i < hex.length; i++) {
+            for (int j = 0; j < hex[i].length; j++) {
+                newHex[i][j] = hex[i][j].getMainNum();
+            }
+        }
+        return newHex;
     }
 
     // stones layout

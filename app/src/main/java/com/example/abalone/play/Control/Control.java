@@ -31,9 +31,8 @@ public class Control {
         return single_Instance;
     }
 
-    public static Control getInstance(int num, GameActivity activity) {
-        if (single_Instance == null)
-            single_Instance = new Control(num, activity);
+    public static Control createInstance(int num, GameActivity activity) {
+        single_Instance = new Control(num, activity);
         return single_Instance;
     }
 
@@ -137,6 +136,15 @@ public class Control {
 
     public void makeInvisible(ArrayList<Stone> selected) {
         gameUI.makeTroopsInvisible(selected, null);
+    }
+
+    public void buildCustomBoard(int[][] hexArray, int player) {
+        board.organize(hexArray);
+        board.setPlayer(player);
+    }
+
+    public int[][] getBoardAsInt() {
+        return board.turnStoneToIntArr();
     }
 
 }

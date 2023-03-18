@@ -3,7 +3,9 @@ package com.example.abalone.play;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,7 +25,11 @@ public class ContinueActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.continue_layout);
         createNotificationChannel();
-        if (!Control.hasInstance())
+
+        SharedPreferences sharedPref = getSharedPreferences( "my_prefs", Context.MODE_PRIVATE);
+        String noState = getString(R.string.no_board_state);
+        System.out.println("This: " + sharedPref.getString(getString(R.string.saved_board_state), noState));
+        if (sharedPref.getString(getString(R.string.saved_board_state), noState).equals(noState))
             newGame(null);
 
         menuSetUp();
@@ -34,12 +40,14 @@ public class ContinueActivity extends AppCompatActivity {
     private void newGame(View view) {
         Intent intent = new Intent(this, ChooseActivity.class);
         startActivity(intent);
-
+        finish();
     }
 
     private void continueGame(View view) {
         Intent intent = new Intent(this, GameActivity.class);
+        intent.putExtra(getString(R.string.use_saved_board), true);
         startActivity(intent);
+        finish();
     }
 
     public void menuSetUp() {
