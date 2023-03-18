@@ -1,9 +1,15 @@
 package com.example.abalone.play.Control;
 
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+
+import com.example.abalone.play.GameActivity;
 import com.example.abalone.play.Logic.AI;
 import com.example.abalone.play.Logic.Board;
 import com.example.abalone.play.Logic.Data.User;
 import com.example.abalone.play.Logic.Stone;
+
+import java.util.ArrayList;
 
 public class Control {
     private Stone currentStone;
@@ -11,6 +17,10 @@ public class Control {
     private int deadBlue, deadRed;
 
     public static User selectedUser;
+
+    public static Drawable current;
+
+    public GameActivity gameUI;
 
     private AI ai;
     private Board board = null;
@@ -21,9 +31,9 @@ public class Control {
         return single_Instance;
     }
 
-    public static Control getInstance(int num) {
+    public static Control getInstance(int num, GameActivity activity) {
         if (single_Instance == null)
-            single_Instance = new Control(num);
+            single_Instance = new Control(num, activity);
         return single_Instance;
     }
 
@@ -41,13 +51,14 @@ public class Control {
         ai = AI.getInstance(board.getPlayer() * -1);
     }
 
-    private Control(int num) {
+    private Control(int num, GameActivity activity) {
         currentStone = null;
         if (board == null)
             board = new Board(true, num);
         deadBlue = board.deadBlue;
         deadRed = board.deadRed;
         ai = AI.getInstance(board.getPlayer() * -1);
+        this.gameUI = activity;
     }
 
     public Board setUpBoard(int num) {
@@ -69,8 +80,8 @@ public class Control {
         return board.makeMove(this.currentStone);
     }
 
-    public boolean AIMoveMaybe() {
-        return board.CheckAndMoveAI();
+    public boolean AIMoveMaybe(boolean AiTurn) {
+        return board.CheckAndMoveAI(AiTurn);
     }
 
     public int getDeadBlue() {
@@ -110,6 +121,22 @@ public class Control {
         if (selectedUser != null)
             return selectedUser;
         return null;
+    }
+
+    public static void setCurrentImageView(Drawable imageView) {
+        current = imageView;
+    }
+
+    public static Drawable getCurrentImageView() {
+        return current;
+    }
+
+    public void makeInvisible(ArrayList<Stone> selected, ArrayList<Stone> toBe) {
+        gameUI.makeTroopsInvisible(selected, toBe);
+    }
+
+    public void makeInvisible(ArrayList<Stone> selected) {
+        gameUI.makeTroopsInvisible(selected, null);
     }
 
 }

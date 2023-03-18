@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.ImageView;
@@ -16,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.abalone.R;
+import com.example.abalone.play.Control.Control;
 
 public class forUserSelect extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -23,14 +25,14 @@ public class forUserSelect extends AppCompatActivity {
     private ImageView imageView;
 
     private ActivityResultLauncher<Intent> cameraLauncher;
-    private ActivityResultLauncher<String> galleryLauncher;
+    private ActivityResultLauncher<Intent> galleryLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_for_user_select);
 
-        imageView = null;
+        imageView = new ImageView(this);
 
         cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
@@ -38,18 +40,18 @@ public class forUserSelect extends AppCompatActivity {
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
                 imageView.setImageBitmap(imageBitmap);
             }
+            finish();
         });
 
-        galleryLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
-            if (result) {
-                Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                galleryLauncher.launch(pickPhotoIntent);
-            } else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+        galleryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri imageUri = result.getData().getData();
+                imageView.setImageURI(imageUri);
             }
+            finish();
         });
 
-        imageView.setOnClickListener(v -> showImageDialog());
+        showImageDialog();
     }
 
     private void showImageDialog() {
@@ -62,6 +64,7 @@ public class forUserSelect extends AppCompatActivity {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                             cameraLauncher.launch(takePictureIntent);
+                            finish();
                         }
                     } else {
                         requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
@@ -70,7 +73,8 @@ public class forUserSelect extends AppCompatActivity {
                 case 1:
                     if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                         Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        galleryLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                        galleryLauncher.launch(pickPhotoIntent);
+                        finish();
                     } else {
                         requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_IMAGE_PICK);
                     }
@@ -90,11 +94,16 @@ public class forUserSelect extends AppCompatActivity {
             }
         } else if (requestCode == REQUEST_IMAGE_PICK && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            galleryLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+            galleryLauncher.launch(pickPhotoIntent);
         } else {
             Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
+        finish();
     }
-}
 
+    @Override
+    public void finish() {
+        Control.setCurrentImageView(imageView.getDrawable());
+        super.finish();
+    }
 }

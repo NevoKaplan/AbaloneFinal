@@ -1,8 +1,10 @@
 package com.example.abalone.play.Logic;
 
+import com.example.abalone.play.Control.Control;
 import com.example.abalone.play.Control.Layouts;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class Board {
@@ -20,13 +22,17 @@ public class Board {
     public ArrayList<Stone> move2 = null;
     public ArrayList<Stone> targets = null;
 
+    private Control control;
     private AI ai;
+
+    protected boolean AiTurn;
 
     // get player
     public int getPlayer() { return this.player; }
 
     // creates the board
     public Board(boolean first, int num) {
+        AiTurn = false;
         boolean increase = false;
         player = 1;
         int cols = 9, rows = 9;
@@ -167,24 +173,30 @@ public class Board {
         return pushedTroops;
     }
 
-    public boolean CheckAndMoveAI() {
-        if (AI.hasInstance()) {
+    public boolean CheckAndMoveAI(boolean goAhead) {
+        if (goAhead && AI.hasInstance()) {
 
             ai = AI.getInstance(player * -1);
-
+            AiTurn = true;
+            player *= -1;
             AIBoard aiBoard = ai.bestMove(this);
 
-            updateBoardWithAI(aiBoard);
+
+            ArrayList<Stone>[] madeMove = aiBoard.getMadeMove();
             System.out.println("MadeMove: ");
             for (int i = 0; i < 2; i++) {
                 if (i == 0)
                     System.out.println("Before: ");
                 else
                     System.out.println("After: ");
-                for (Stone s: aiBoard.getMadeMove()[i]) {
+                for (Stone s: madeMove[i]) {
                     System.out.println(s);
                 }
             }
+            Stone.reverseList(madeMove[0]);
+            control.makeInvisible(madeMove[0], madeMove[1]);
+            updateBoardWithAI(aiBoard);
+            AiTurn = false;
             return true;
         }
         else {
@@ -285,15 +297,36 @@ public class Board {
                     drow = (moveTo.row - last.row);
                     dcol = (moveTo.col - last.col);
                 }
-
-
-                this.sideMove(drow, dcol);
-
-                return true;
+                if (!AiTurn) {
+                    if (callToControl(false)) {
+                        this.sideMove(drow, dcol);
+                        return true;
+                    } else
+                        return false;
+                }
+                else {
+                    this.sideMove(drow, dcol);
+                    return true;
+                }
             }
         }
         else
             return false;
+    }
+
+    private boolean callToControl(boolean isLineMove) {
+        if (Control.hasInstance()) {
+            control = Control.getInstance();
+            if (isLineMove)
+                control.makeInvisible(this.selected);
+            else
+                control.makeInvisible(this.selected, this.toBe);
+            return true;
+        }
+        else {
+            System.out.println("Problem in Board Class");
+            return false;
+        }
     }
 
     // if moveTo is same line add all stones leading up to toBe
@@ -331,7 +364,6 @@ public class Board {
             dcol = (moveTo.col - last.col);
         }*/
 
-
         for (Stone temp : selected) {
 
             int num = hex[temp.row + drow][temp.col + dcol].getMainNum();
@@ -352,6 +384,7 @@ public class Board {
             next.setOgNum(next.getMainNum());
         }
         first.setMainNum(0);
+        first.setOgNum(0);
     }
 
     // checks if stone should be killed and moves on
@@ -363,7 +396,12 @@ public class Board {
                 deadBlue++;
             System.out.println("Dead red: " + deadRed + ", Dead blue: " + deadBlue);
         }
-        actuallyPush();
+        if (!AiTurn) {
+            if (callToControl(true))
+                this.actuallyPush();
+        }
+        else
+            this.actuallyPush();
     }
 
     // returns a list with all available targets to go to

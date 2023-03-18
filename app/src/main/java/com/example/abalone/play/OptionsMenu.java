@@ -1,9 +1,14 @@
 package com.example.abalone.play;
 
+import static android.content.Context.ALARM_SERVICE;
+
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
@@ -18,6 +24,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -37,6 +44,7 @@ import com.example.abalone.R;
 import com.example.abalone.play.Logic.Data.ShowDatabase;
 import com.example.abalone.play.Logic.Data.User;
 import com.example.abalone.play.Logic.Data.UserTable;
+import com.example.abalone.play.alarmManager.MyBroadcastReceiver;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +64,7 @@ public class OptionsMenu extends PopupMenu {
     private Uri imageUri;
     private ImageView userImage;
     private Uri fileUri;
+    private int totalTime, hour, minute;
 
     public OptionsMenu(Context context, View anchor) {
         super(context, anchor);
@@ -87,6 +96,9 @@ public class OptionsMenu extends PopupMenu {
                 intent.putExtra("forSigningIn", false);
                 context.startActivity(intent);
                 break;
+            case R.id.notification:
+                popTimePicker();
+                break;
             default:
                 break;
         }
@@ -95,6 +107,42 @@ public class OptionsMenu extends PopupMenu {
     }
 
     public void showUsers() {
+
+    }
+
+    private void popTimePicker() {
+        totalTime = 0;
+        TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                totalTime += selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000;
+                hour = selectedHour;
+                minute = selectedMinute;
+
+                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                Intent intent = new Intent(context, MyBroadcastReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + totalTime, pendingIntent);
+
+                String toastText = "A notification will be sent in ";
+                if (hour == 1)
+                    toastText += hour + " hour and ";
+                else if (hour > 0)
+                    toastText += hour + " hours and ";
+                if (minute == 1)
+                    toastText += minute + " minute";
+                else if (minute > 0)
+                    toastText += minute + " minutes";
+                else if (hour == 0)
+                    toastText += "a few seconds";
+
+                Toast.makeText(context, toastText, Toast.LENGTH_LONG).show();
+            }
+        };
+        TimePickerDialog timePickerDialog = new TimePickerDialog(context, onTimeSetListener, hour, minute, true);
+
+        timePickerDialog.setTitle("Select Time for Notification");
+        timePickerDialog.show();
 
     }
 
@@ -115,6 +163,7 @@ public class OptionsMenu extends PopupMenu {
         userImage.setOnClickListener(view ->
         {
             Intent intent = new Intent(context, forUserSelect.class);
+            intent.putExtra("userImage", R.id.userImage);
             context.startActivity(intent);
         });
 
@@ -132,6 +181,7 @@ public class OptionsMenu extends PopupMenu {
                 Bitmap bitmap=((BitmapDrawable)img.getDrawable()).getBitmap();
                 dialog.dismiss();
                 User user = new User(name, surname, email, bitmap);
+                System.out.println("Bitmap (OptionsMenu): " + bitmap.getHeight() + ", " + bitmap.getWidth());
                 table.createUser(user);
                 Toast.makeText(context, name + "'s details saved", Toast.LENGTH_SHORT).show();
                 return user;

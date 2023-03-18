@@ -152,6 +152,6 @@
         app:layout_constraintEnd_toEndOf="@+id/textView"
         app:layout_constraintStart_toStartOf="@+id/textView"
         app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:srcCompat="@drawable/hexagon" />
+        app:srcCompat="@drawable/sign_checked" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -124,10 +124,13 @@ public class UserTable extends SQLiteOpenHelper {
         values.put(UserTable.COLUMN_EMAIL, user.getEmail());
         Bitmap temp = user.getImg();
         Bitmap copy = Bitmap.createBitmap(temp.getWidth(), temp.getHeight(), temp.getConfig());
+        Canvas canvas = new Canvas(copy);
+        canvas.drawBitmap(temp, 0, 0, null);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         copy.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
-
+        System.out.println("Bitmap (UserTable Temp): " + temp.getHeight() + ", " + temp.getWidth());
+        System.out.println("Bitmap (UserTable Copy): " + copy.getHeight() + ", " + copy.getWidth());
         values.put(UserTable.COLUMN_IMAGE, byteArray);
         System.out.println("database: " + database);
         this.open();

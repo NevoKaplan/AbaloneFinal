@@ -44,6 +44,7 @@ public class AIBoard extends Board {
         deadBlue = board.deadBlue;
         deadRed = board.deadRed;
         sideMoveable = false;
+        this.AiTurn = true;
     }
 
     public AIBoard(AIBoard board) {
@@ -61,6 +62,7 @@ public class AIBoard extends Board {
         deadRed = board.deadRed;
         alreadyBoards = new ArrayList<>();
         sideMoveable = false;
+        this.AiTurn = true;
     }
 
     public void resetAlreadyBoards() {

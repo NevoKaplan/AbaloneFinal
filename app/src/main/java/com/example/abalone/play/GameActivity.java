@@ -5,6 +5,9 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -21,6 +24,7 @@ import com.example.abalone.play.Logic.AI;
 import com.example.abalone.play.Logic.Board;
 import com.example.abalone.play.Logic.Stone;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -35,6 +39,15 @@ public class GameActivity extends AppCompatActivity {
 
     private int removedSize;
 
+    private ImageView movingImages[] = new ImageView[5];
+
+    private MyHandler hndlr;
+
+    private int preRemovedBlue, preRemovedRed;
+
+    private boolean AiTurn;
+
+    private static final int YOffset = 100;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,11 +55,14 @@ public class GameActivity extends AppCompatActivity {
 
         Intent received = getIntent();
         Bundle bundle = received.getBundleExtra("bundle") ; //getArguments();
-        control = Control.getInstance(bundle.getInt("layoutNum", 1));
+        control = Control.getInstance(bundle.getInt("layoutNum", 1), this);
         bluePiece = ContextCompat.getDrawable(this, bundle.getInt("bluePiece", R.drawable.marble_blue));
         redPiece = ContextCompat.getDrawable(this, bundle.getInt("redPiece", R.drawable.marble_red));
         empty_space = ContextCompat.getDrawable(this, R.drawable.empty_space);
         board = control.getBoard();
+        preRemovedBlue = board.deadBlue;
+        preRemovedRed = board.deadRed;
+        hndlr = new MyHandler();
         //onConfigurationChanged(this.getResources().getConfiguration());
 
         int screenWidth = getScreenWidth(), size = screenWidth - (int)(screenWidth * 0.02);
@@ -54,11 +70,20 @@ public class GameActivity extends AppCompatActivity {
         background.getLayoutParams().height = size;
         background.getLayoutParams().width = size;
         background.requestLayout();
+
+        movingImages[0] = findViewById(R.id.movingImage);
+        movingImages[1] = findViewById(R.id.movingImage2);
+        movingImages[2] = findViewById(R.id.movingImage3);
+        movingImages[3] = findViewById(R.id.movingImage4);
+        movingImages[4] = findViewById(R.id.movingImage5);
+
         createBoard((int)((background.getLayoutParams().width * 0.97)/9), board);
         buttons();
         removedSize = getRemovedPieceSize();
         for (int i = 0; i < removedPieces.length; i++)
             removedPieces[i] = new ArrayList<>();
+
+        AiTurn = false;
     }
 
 
@@ -80,6 +105,10 @@ public class GameActivity extends AppCompatActivity {
         Stone[][] tempHex = board.hex;
         layout = findViewById(R.id.layout);
         ConstraintSet cs = new ConstraintSet();
+        ConstraintLayout.LayoutParams lp2 =
+                new ConstraintLayout.LayoutParams(size, size);
+        for (ImageView movingImage : movingImages)
+            movingImage.setLayoutParams(lp2);
 
         for (int iRow = 0; iRow < tempHex.length; iRow++) {
             for (int iCol = 0; iCol < tempHex[iRow].length; iCol++) {
@@ -162,30 +191,30 @@ public class GameActivity extends AppCompatActivity {
     public void gettingStone(View view) {
         int row = (int)view.getTag()/board.hex.length;
         int col = (int)view.getTag()%board.hex.length;
-        int preDeadRed = board.deadRed, preDeadBlue = board.deadBlue;
         if (!(board.selectedSize == 0 && board.hex[row][col].getMainNum() != board.getPlayer())) {
             if (control.setCurrentStone(board.hex[row][col])) {
-                int newDeadRed = board.deadRed, newDeadBlue = board.deadBlue;
 
-                updateBoard();
-                changePlayerImage(board.getPlayer() * -1);
-                System.out.println("Here And Now");
-                //addRemovedPiece((int)Math.round(Math.random()));
-                checkToAdd(preDeadRed, preDeadBlue, newDeadRed, newDeadBlue);
-                preDeadRed = board.deadRed; preDeadBlue = board.deadBlue;
-                if (control.hasAiInstance()) {
-                    changePlayerImage(board.getPlayer() * -1);
-                }
-                if (control.AIMoveMaybe()) { // check if there's AI and if so then make move
-                    newDeadRed = board.deadRed; newDeadBlue = board.deadBlue;
-                    updateBoard();
-                    changePlayerImage(board.getPlayer());
-                    checkToAdd(preDeadRed, preDeadBlue, newDeadRed, newDeadBlue);
-                }
             }
-            else
+            else {
                 preUpdateBoard();
+            }
         }
+    }
+
+    private void afterPieceMovement() {
+        // creates infinite loop after AI turn - need to fix
+        updateBoard();
+        changePlayerImage(board.getPlayer() * -1);
+        System.out.println("Here And Now, current player: " + board.getPlayer());
+        if (control.hasAiInstance()) {
+            //changePlayerImage(board.getPlayer() * -1);
+            AiTurn = !AiTurn;
+        }
+        if (control.AIMoveMaybe(AiTurn)) { // check if there's AI and if so then make move
+            updateBoard();
+            changePlayerImage(board.getPlayer());
+        }
+        System.out.println("Here And Now 2, current player: " + board.getPlayer());
     }
 
     private void checkToAdd(int preRed, int preBlue, int red, int blue) {
@@ -196,6 +225,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private boolean updateBoard() {
+        int removedBluePieces = 14, removedRedPieces = 14;
         for (int i = 0; i < board.hex.length; i++) {
             for (int j = 0; j < board.hex.length; j++) {
                 int num = board.hex[i][j].getMainNum();
@@ -204,8 +234,10 @@ public class GameActivity extends AppCompatActivity {
                     // if (imageView != null) {
                     if (num == 1) {
                         imageView.setBackground(bluePiece);
+                        removedBluePieces--;
                     } else if (num == -1) {
                         imageView.setBackground(redPiece);
+                        removedRedPieces--;
                     } else {
                         imageView.setBackground(empty_space);
 
@@ -214,6 +246,14 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }
+
+        if (removedBluePieces > preRemovedBlue)
+            addRemovedPiece(1);
+        else if (removedRedPieces > preRemovedRed)
+            addRemovedPiece(-1);
+        preRemovedRed = removedRedPieces;
+        preRemovedBlue = removedBluePieces;
+
         return true;
     }
 
@@ -382,6 +422,46 @@ public class GameActivity extends AppCompatActivity {
         }
         layout.addView(imageView);
         layout.requestLayout();
+        checkWin();
+    }
+
+    public void makeTroopsInvisible(ArrayList<Stone> selected, ArrayList<Stone> toBe) {
+
+        ArrayList<Stone> newSelected = new ArrayList<>();
+        ArrayList<Stone> newToBe = new ArrayList<>();
+        for (Stone s : selected)
+            newSelected.add(new Stone(s));
+        if (toBe != null) {
+            for (Stone s : toBe)
+                newToBe.add(new Stone(s));
+        }
+        else
+            newToBe.add(newSelected.remove(newSelected.size()-1));
+
+        ArrayList<ImageView> fromImages = new ArrayList<>();
+        for (Stone stone : newSelected) {
+            int[] cur = stone.getPosition();
+            ImageView image = findViewById(idArray[cur[0]][cur[1]]);
+            fromImages.add(image);
+        }
+
+        ArrayList<int[]> to = new ArrayList<>();
+        for (Stone stone : newToBe) {
+            to.add(stone.getPosition());
+        }
+        Collections.reverse(fromImages);
+        movingPiece(fromImages, to);
+    }
+
+    private void checkWin() {
+        if (board.deadBlue >= 6)
+            showWin(-1);
+        else if (board.deadRed >= 6)
+            showWin(1);
+    }
+
+    private void showWin(int player) {
+
     }
 
     private void changePlayerImage(int player) {
@@ -405,4 +485,128 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    public void movingPiece(ArrayList<ImageView> from, ArrayList<int[]> to){
+        ArrayList<int[]> posXY1 = new ArrayList<>(); // pixels on screen
+        ArrayList<int[]> posXY2 = new ArrayList<>();
+        ImageView toImage = findViewById(idArray[to.get(0)[0]][to.get(0)[1]]);
+        for (ImageView image : from) {
+            int[] posFrom = new int[2];
+            int[] posTo = new int[2];
+            int x = 0;
+            int y = 0;
+            image.getLocationOnScreen(posFrom);
+            toImage.getLocationOnScreen(posTo);
+            posXY1.add(posFrom);
+            if (posXY1.size() > 1) {
+                x = posFrom[0] - posXY1.get(0)[0];
+                y = posFrom[1] - posXY1.get(0)[1];
+            }
+            posTo[0] += x;
+            posTo[1] += y;
+            posXY2.add(posTo);
+        }
+
+        //Log.d("TAG", "gettingPiece: " + posXY1[0] + "," + posXY1[1] + "to: " + posXY2[0] + "," + posXY2[1]);
+        int size = from.size();
+        for (int index = 0; index < size; index++) {
+            movingImages[index].setX(posXY1.get(index)[0]);
+            movingImages[index].setY(posXY1.get(index)[1] - YOffset);
+            ImageView curFrom = from.get(index);
+            movingImages[index].setBackground(curFrom.getBackground());
+            curFrom.setBackground(empty_space);
+            movingImages[index].setVisibility(View.VISIBLE);
+            // Log.d("TAG", "movingPiece: " + movingImage.getX() + "," + movingImage.getY());
+            MovePieceThread movePieceThread = new MovePieceThread(posXY1.get(index)[0], posXY1.get(index)[1] - YOffset, posXY2.get(index)[0], posXY2.get(index)[1] - YOffset, index, size - 1);
+            movePieceThread.start();
+
+        }
+    }
+
+    private class MyHandler extends Handler
+    {
+
+        @Override
+        public void handleMessage(Message msg)
+        {
+            Bundle data = msg.getData();
+            int count = data.getInt("count");
+            float[] arr = data.getFloatArray("arr");
+            int frames = data.getInt("frames");
+            int index = data.getInt("index");
+            int maxIndex = data.getInt("maxIndex");
+            movingImages[index].setVisibility(View.VISIBLE);
+            movingImages[index].setX(arr[0]);
+            movingImages[index].setY(arr[1]);
+            Log.d("TAG", "handleMessage: " + count);
+
+            // update the Timer TextView
+            // tvTimer.setText("" + count);
+
+            if (count == frames) {
+                movingImages[index].setVisibility(View.INVISIBLE);
+                if (maxIndex == index)
+                    afterPieceMovement();
+            }
+        } // handleMessage(...)
+
+    }
+
+    public class MovePieceThread extends Thread
+    {
+        private int movingPieceX, movingPieceY;
+        private int targetX, targetY;
+        private int interval = 32; // "sleep" interval in milisec
+        private int frames = 10;
+        private int currentIndex;
+        private int maxIndex;
+
+        public MovePieceThread(int _movingPieceX, int _movingPieceY, int _targetX, int _targetY, int _currentIndex, int _maxIndex)
+        {
+            this.movingPieceX = _movingPieceX;
+            this.movingPieceY = _movingPieceY;
+            this.targetX = _targetX;
+            this.targetY = _targetY;
+            this.currentIndex = _currentIndex;
+            this.maxIndex = _maxIndex;
+        }
+
+        public void run()
+        {
+            int whileCounter = 0;
+            float dX, dY;
+
+            dX = (this.targetX - this.movingPieceX)/this.frames;
+            dY = (this.targetY - this.movingPieceY)/this.frames;
+            while (whileCounter < this.frames)
+            {
+                try
+                {
+                    this.movingPieceX += dX;
+                    this.movingPieceY += dY;
+                    Thread.sleep(interval);
+                }
+                catch (InterruptedException ex)
+                {
+                    ex.printStackTrace();
+                }  // catch
+                Log.d(": ", "counter=" + whileCounter);
+                whileCounter++;
+                sendCounter2Activity(this.movingPieceX, this.movingPieceY, whileCounter);
+            } // while
+        } // run()
+
+        private void sendCounter2Activity(int X, int Y, int count)
+        {
+            Message msg = hndlr.obtainMessage();
+            float[] arr = {X, Y};
+            Bundle data = msg.getData();
+            Log.d("AG", "KKK, X: " + X + " Y: " + Y);
+            data.putInt("count", count);
+            data.putInt("frames", this.frames);
+            data.putFloatArray("arr", arr);
+            data.putInt("index", this.currentIndex);
+            data.putInt("maxIndex", this.maxIndex);
+            hndlr.sendMessage(msg);
+        }
+    }
 }
