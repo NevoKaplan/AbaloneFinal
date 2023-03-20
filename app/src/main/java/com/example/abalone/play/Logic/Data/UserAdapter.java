@@ -7,14 +7,12 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +45,7 @@ public class UserAdapter extends ArrayAdapter<User> {
 
             holder = new ViewHolder();
             holder.name = convertView.findViewById(R.id.tvName);
-            holder.email = convertView.findViewById(R.id.tvEmail);
+            holder.wins = convertView.findViewById(R.id.tvEmail);
             holder.imageView = convertView.findViewById(R.id.image);
             holder.id = convertView.findViewById(R.id.sId);
             holder.trashCan = convertView.findViewById(R.id.trashCan);
@@ -60,7 +58,8 @@ public class UserAdapter extends ArrayAdapter<User> {
         User temp = objects.get(position);
         String fullName = (temp.getName() + " " + temp.getSurname()).trim();
         holder.name.setText(fullName);
-        holder.email.setText(temp.getEmail() + "");
+        String winAmount = "Won " + temp.getWins() + " Games";
+        holder.wins.setText(winAmount);
         //  holder.imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         System.out.println("Bitmap (UserAdapter): " + temp.getImg().getHeight() + ", " + temp.getImg().getWidth());
         //Drawable d = new BitmapDrawable(context.getResources(), temp.getImg());
@@ -164,7 +163,7 @@ public class UserAdapter extends ArrayAdapter<User> {
 
     static class ViewHolder {
         TextView name;
-        TextView email;
+        TextView wins;
         ImageView imageView;
         TextView id;
         ImageView trashCan;

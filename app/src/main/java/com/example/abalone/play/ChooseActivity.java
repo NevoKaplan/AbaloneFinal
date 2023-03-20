@@ -3,14 +3,17 @@ package com.example.abalone.play;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
@@ -41,6 +44,8 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
     private CustomAdapter adapter;
 
     static Random rnd = new Random();
+
+    private boolean aiActivated;
 
     private final int[] possible = {R.drawable.marble_blue, R.drawable.marble_red,
             R.drawable.marble_gray, R.drawable.marble_white,
@@ -92,6 +97,10 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
         onChange();
     }
 
+    private void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        aiActivated = isChecked;
+    }
+
     public void onClick4(View view) {
         Intent intent = new Intent(this, GameActivity.class);
         Bundle bundle = new Bundle();
@@ -128,6 +137,7 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
                 break;
         }
         bundle.putInt("layoutNum", layoutNum);
+        bundle.putBoolean("activateAI", aiActivated);
         intent.putExtra("bundle", bundle);
         startActivity(intent);
         finish();
@@ -166,11 +176,15 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
             realBoards[i].setOnClickListener(this::onClick4);
             i++;
         }
+        aiActivated = false;
+
         findViewById(R.id.shuffle).setOnClickListener(this::onClick4);
         findViewById(R.id.topRightArrow).setOnClickListener(this::onArrowClick);
         findViewById(R.id.topLeftArrow).setOnClickListener(this::onArrowClick);
         findViewById(R.id.bottomRightArrow).setOnClickListener(this::onArrowClick);
         findViewById(R.id.bottomLeftArrow).setOnClickListener(this::onArrowClick);
+        SwitchCompat switch1 = findViewById(R.id.aiSwitch);
+        switch1.setOnCheckedChangeListener(this::onCheckedChanged);
     }
 
     private class firstThread implements Runnable {

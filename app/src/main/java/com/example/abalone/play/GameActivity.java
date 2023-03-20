@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
@@ -13,19 +15,17 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 import com.example.abalone.R;
 import com.example.abalone.play.Control.Control;
-import com.example.abalone.play.Logic.AI;
 import com.example.abalone.play.Logic.Board;
+import com.example.abalone.play.Logic.Data.User;
 import com.example.abalone.play.Logic.Stone;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,11 +50,15 @@ public class GameActivity extends AppCompatActivity {
 
     private int preRemovedBlue, preRemovedRed;
 
-    private boolean AiTurn;
+    private int AiTurn; // 0 No Ai, 1 Ai's turn, -1 Player's turn
 
     private static final int YOffset = 100;
 
     private SharedPreferences sharedPref;
+
+    private User mainUser;
+
+    private Bitmap playerImgBitmap, guestImgBitmap;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,14 +73,24 @@ public class GameActivity extends AppCompatActivity {
         bluePiece = ContextCompat.getDrawable(this, bluePieceInt);
         int redPieceInt = bundle.getInt("redPiece", R.drawable.marble_red);
         redPiece = ContextCompat.getDrawable(this, redPieceInt);
+        boolean shouldActivateAI = bundle.getBoolean("activateAI", false);
+        if (shouldActivateAI)
+            AiTurn = -1;
+        else
+            AiTurn = 0;
         empty_space = ContextCompat.getDrawable(this, R.drawable.empty_space);
-        board = control.getBoard();
-        preRemovedBlue = board.deadBlue;
-        preRemovedRed = board.deadRed;
+
         hndlr = new MyHandler();
         //onConfigurationChanged(this.getResources().getConfiguration());
 
         sharedPref = getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
+
+        board = control.getBoard();
+
+        removedSize = getRemovedPieceSize();
+        for (int i = 0; i < removedPieces.length; i++)
+            removedPieces[i] = new ArrayList<>();
+        layout = findViewById(R.id.layout);
 
         // if should use previously saved board state
         if (received.getBooleanExtra(getString(R.string.use_saved_board), false)) {
@@ -91,6 +105,9 @@ public class GameActivity extends AppCompatActivity {
             editor.apply();
         }
 
+        preRemovedBlue = board.deadBlue;
+        preRemovedRed = board.deadRed;
+
         int screenWidth = getScreenWidth(), size = screenWidth - (int)(screenWidth * 0.02);
         ImageView background = findViewById(R.id.gridFrame);
         background.getLayoutParams().height = size;
@@ -104,12 +121,14 @@ public class GameActivity extends AppCompatActivity {
         movingImages[4] = findViewById(R.id.movingImage5);
 
         createBoard((int)((background.getLayoutParams().width * 0.97)/9), board);
-        buttons();
-        removedSize = getRemovedPieceSize();
-        for (int i = 0; i < removedPieces.length; i++)
-            removedPieces[i] = new ArrayList<>();
+        menuSetUp();
 
-        AiTurn = false;
+        onResume();
+        if (AiTurn == 0)
+            guestImgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+        else
+            guestImgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.robot_thinking);
+        changePlayerImage(board.getPlayer());
     }
 
     private void setUpBoardFromSavedState() {
@@ -122,9 +141,16 @@ public class GameActivity extends AppCompatActivity {
             }
         }
         control.buildCustomBoard(savedList, sharedPref.getInt("currentPlayer", 1));
-        AiTurn = sharedPref.getBoolean("AiTurn", false);
+        AiTurn = sharedPref.getInt("AiTurn", 0);
         bluePiece = ContextCompat.getDrawable(this, sharedPref.getInt("bluePiece", R.drawable.marble_blue));
         redPiece = ContextCompat.getDrawable(this, sharedPref.getInt("redPiece", R.drawable.marble_red));
+        int deadRed = board.deadRed, deadBlue = board.deadBlue;
+        for (int i = 0; i < deadRed; i++) {
+            addRemovedPiece(-1);
+        }
+        for (int i = 0; i < deadBlue; i++) {
+            addRemovedPiece(1);
+        }
     }
 
     private void saveCurrentBoardState() {
@@ -137,7 +163,7 @@ public class GameActivity extends AppCompatActivity {
         }
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(getString(R.string.saved_board_state), str.toString());
-        editor.putBoolean("AiTurn", AiTurn);
+        editor.putInt("AiTurn", AiTurn);
         editor.putInt("currentPlayer", board.getPlayer());
         editor.apply();
     }
@@ -151,15 +177,8 @@ public class GameActivity extends AppCompatActivity {
         decorView.setSystemUiVisibility(uiOptions);
     }*/
 
-
-    private void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        control.onCheckedChanged(isChecked);
-    }
-
-
     private void createBoard(int size, Board board) {
         Stone[][] tempHex = board.hex;
-        layout = findViewById(R.id.layout);
         ConstraintSet cs = new ConstraintSet();
         ConstraintLayout.LayoutParams lp2 =
                 new ConstraintLayout.LayoutParams(size, size);
@@ -226,24 +245,6 @@ public class GameActivity extends AppCompatActivity {
         cs.applyTo(layout);
     }
 
-    // this should be in control...
-    /*public void gettingStone(View view) {
-        outerloop:
-        for (int i = 0; i < idArray.length; i++) {
-            for (int j = 0; j < idArray.length; j++) {
-                if (view.getId() == idArray[i][j]) {
-                    if (!(board.selectedSize == 0 && board.hex[i][j].getMainNum() != board.player)) {
-                        if (control.setCurrentStone(board.hex[i][j]))
-                            updateBoard();
-                        else
-                            preUpdateBoard();
-                    }
-                    break outerloop;
-                }
-            }
-        }
-    }*/
-
     public void gettingStone(View view) {
         int row = (int)view.getTag()/board.hex.length;
         int col = (int)view.getTag()%board.hex.length;
@@ -261,26 +262,18 @@ public class GameActivity extends AppCompatActivity {
         // creates infinite loop after AI turn - need to fix
         updateBoard();
         changePlayerImage(board.getPlayer() * -1);
-        if (control.hasAiInstance()) {
-            //changePlayerImage(board.getPlayer() * -1);
-            AiTurn = !AiTurn;
-        }
+        AiTurn *= -1;
+        if (AiTurn == 1)
+            changePlayerImage(board.getPlayer() * -1);
+
         if (control.AIMoveMaybe(AiTurn)) { // check if there's AI and if so then make move
             updateBoard();
-            changePlayerImage(board.getPlayer());
         }
         saveCurrentBoardState();
         checkWin();
     }
 
-    private void checkToAdd(int preRed, int preBlue, int red, int blue) {
-        if (blue > preBlue)
-            addRemovedPiece(1);
-        else if (red > preRed)
-            addRemovedPiece(0);
-    }
-
-    private boolean updateBoard() {
+    private void updateBoard() {
         int removedBluePieces = 14, removedRedPieces = 14;
         for (int i = 0; i < board.hex.length; i++) {
             for (int j = 0; j < board.hex.length; j++) {
@@ -296,7 +289,6 @@ public class GameActivity extends AppCompatActivity {
                         removedRedPieces--;
                     } else {
                         imageView.setBackground(empty_space);
-
                     }
                     //}
                 }
@@ -310,7 +302,6 @@ public class GameActivity extends AppCompatActivity {
         preRemovedRed = removedRedPieces;
         preRemovedBlue = removedBluePieces;
 
-        return true;
     }
 
     private void preUpdateBoard() {
@@ -354,40 +345,6 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    /*@Override
-    public void onConfigurationChanged(Configuration newConfig)
-    {
-
-        super.onConfigurationChanged(newConfig);
-
-        int orientation = newConfig.orientation;
-        int screenHeight = getScreenHeight();
-        int screenWidth = getScreenWidth();
-        setContentView(R.layout.activity_main);
-        ImageView background = findViewById(R.id.gridFrame);
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            background.getLayoutParams().height = screenWidth - (int)(screenWidth * 0.02);
-            background.getLayoutParams().width = background.getLayoutParams().height;
-        }
-
-        else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            background.getLayoutParams().height = screenHeight - (int)(screenHeight * 0.1);
-            background.getLayoutParams().width = background.getLayoutParams().height;
-        }
-
-        background.requestLayout();
-        createBoard((int)((background.getLayoutParams().width * 0.97)/9), board);
-        buttons();
-    }*/
-
-    private void buttons() {
-        SwitchCompat switch1 = findViewById(R.id.switch1);
-        switch1.setOnCheckedChangeListener(this::onCheckedChanged);
-        switch1.setChecked(AI.hasInstance());
-        changePlayerImage(board.getPlayer());
-        menuSetUp();
-    }
-
     public static int getScreenWidth() {
         return Resources.getSystem().getDisplayMetrics().widthPixels;
     }
@@ -408,37 +365,6 @@ public class GameActivity extends AppCompatActivity {
             }
         }
     }
-
-    /*public void onClick(View view) {
-        int n = -1;
-        switch(view.getId()) {
-            case R.id.bNormal:
-                n = 1;
-                break;
-            case R.id.bGerman:
-                n = 2;
-                break;
-            case R.id.bSnakes:
-                n = 3;
-                break;
-            case R.id.bCrown:
-                n = 4;
-                break;
-            default:
-                break;
-        }
-        if (n != -1) {
-            board = control.setUpBoard(n);
-            updateBoard();
-        }
-    }*/
-
-    /*@Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Control.destroy();
-        finish();
-    }*/
 
     @Override
     public void onDestroy() {
@@ -522,15 +448,20 @@ public class GameActivity extends AppCompatActivity {
 
         String winText;
 
-        // need to change:
-        if (player == 1)
-            winText = "Blue Won!!";
-        else
-            winText = "Red Won!!";
-        // end of need to change
-
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.custom_win_dialog);
+        ImageView imageView = dialog.findViewById(R.id.playerImage);
+        if (player == 1) {
+            winText = mainUser.getName() + " Won!!";
+            imageView.setImageBitmap(mainUser.getImg());
+            if (mainUser.getId() != -1) {
+                control.updateUserAndAddPoint();
+            }
+        }
+        else {
+            winText = "Guest Won!!";
+            imageView.setImageBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.default_image));
+        }
         dialog.setTitle(winText);
         dialog.findViewById(R.id.gloryButton).setOnClickListener(this::endActivity);
         ((TextView)dialog.findViewById(R.id.winText)).setText(winText);
@@ -547,9 +478,9 @@ public class GameActivity extends AppCompatActivity {
     private void changePlayerImage(int player) {
         ImageView imageView = findViewById(R.id.currentPlayer);
         if (player == 1)
-            imageView.setBackground(bluePiece);
+            imageView.setImageBitmap(playerImgBitmap);
         else
-            imageView.setBackground(redPiece);
+            imageView.setImageBitmap(guestImgBitmap);
     }
 
     private int getRemovedPieceSize() {
@@ -688,5 +619,14 @@ public class GameActivity extends AppCompatActivity {
             data.putInt("maxIndex", this.maxIndex);
             hndlr.sendMessage(msg);
         }
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        mainUser = Control.getSelectedUser();
+        if (mainUser == null) {
+            mainUser = new User("Player1", "", "someone@abalone.com", BitmapFactory.decodeResource(this.getResources(), R.drawable.hamar), 0, -1);
+        }
+        playerImgBitmap = mainUser.getImg();
     }
 }

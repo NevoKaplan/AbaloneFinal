@@ -5,10 +5,10 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -19,10 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.abalone.R;
 import com.example.abalone.play.Control.Control;
 
+import java.io.IOException;
+
 public class forUserSelect extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICK = 2;
-    private ImageView imageView;
+    private Bitmap bitmapToGet;
 
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<Intent> galleryLauncher;
@@ -32,13 +34,12 @@ public class forUserSelect extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_for_user_select);
 
-        imageView = new ImageView(this);
-
         cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Bundle extras = result.getData().getExtras();
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                imageView.setImageBitmap(imageBitmap);
+                Bitmap bitmap = (Bitmap)extras.get("data");
+
+                bitmapToGet = rotateAndFlipImage(bitmap);
             }
             finish();
         });
@@ -46,7 +47,13 @@ public class forUserSelect extends AppCompatActivity {
         galleryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 Uri imageUri = result.getData().getData();
-                imageView.setImageURI(imageUri);
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                bitmapToGet = bitmap;
             }
             finish();
         });
@@ -64,7 +71,6 @@ public class forUserSelect extends AppCompatActivity {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                             cameraLauncher.launch(takePictureIntent);
-                            finish();
                         }
                     } else {
                         requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
@@ -74,7 +80,6 @@ public class forUserSelect extends AppCompatActivity {
                     if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                         Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         galleryLauncher.launch(pickPhotoIntent);
-                        finish();
                     } else {
                         requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_IMAGE_PICK);
                     }
@@ -97,13 +102,24 @@ public class forUserSelect extends AppCompatActivity {
             galleryLauncher.launch(pickPhotoIntent);
         } else {
             Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+            finish();
         }
-        finish();
+    }
+
+    private Bitmap rotateAndFlipImage(Bitmap bitmap) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(-90); // Rotate the image by 90 degrees
+        //matrix.postScale(-1, 1); // Flip the image horizontally
+
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        bitmap.recycle(); // Free up memory used by the original bitmap
+
+        return rotatedBitmap;
     }
 
     @Override
     public void finish() {
-        Control.setCurrentImageView(imageView.getDrawable());
+        Control.setCurrentBitmap(bitmapToGet);
         super.finish();
     }
 }

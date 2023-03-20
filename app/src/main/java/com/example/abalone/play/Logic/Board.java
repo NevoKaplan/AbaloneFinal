@@ -4,7 +4,6 @@ import com.example.abalone.play.Control.Control;
 import com.example.abalone.play.Control.Layouts;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 
 public class Board {
@@ -124,11 +123,19 @@ public class Board {
     }
 
     public void organize(int[][] placeAcc) {
+        int redAmount = 14, blueAmount = 14;
         for (int i = 0; i < placeAcc.length; i++) {
             for (int j = 0; j < placeAcc[i].length; j++) {
-                hex[i][j].setBothNums(placeAcc[i][j]);
+                int currentNum = placeAcc[i][j];
+                hex[i][j].setBothNums(currentNum);
+                if (currentNum == 1)
+                    blueAmount--;
+                else if (currentNum == -1)
+                    redAmount--;
             }
         }
+        this.deadBlue = blueAmount;
+        this.deadRed = redAmount;
     }
 
     public int[][] turnStoneToIntArr() {
@@ -188,8 +195,8 @@ public class Board {
         return pushedTroops;
     }
 
-    public boolean CheckAndMoveAI(boolean goAhead) {
-        if (goAhead && AI.hasInstance()) {
+    public boolean CheckAndMoveAI(int goAhead) {
+        if (goAhead == 1 && AI.hasInstance()) {
 
             ai = AI.getInstance(player * -1);
             AiTurn = true;

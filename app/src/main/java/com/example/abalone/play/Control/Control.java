@@ -1,12 +1,13 @@
 package com.example.abalone.play.Control;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.widget.ImageView;
 
 import com.example.abalone.play.GameActivity;
 import com.example.abalone.play.Logic.AI;
 import com.example.abalone.play.Logic.Board;
 import com.example.abalone.play.Logic.Data.User;
+import com.example.abalone.play.Logic.Data.UserTable;
 import com.example.abalone.play.Logic.Stone;
 
 import java.util.ArrayList;
@@ -16,9 +17,9 @@ public class Control {
     private static Control single_Instance = null;
     private int deadBlue, deadRed;
 
-    public static User selectedUser;
+    public static User selectedUser = null;
 
-    public static Drawable current;
+    public static Bitmap current = null;
 
     public GameActivity gameUI;
 
@@ -79,7 +80,7 @@ public class Control {
         return board.makeMove(this.currentStone);
     }
 
-    public boolean AIMoveMaybe(boolean AiTurn) {
+    public boolean AIMoveMaybe(int AiTurn) {
         return board.CheckAndMoveAI(AiTurn);
     }
 
@@ -117,16 +118,14 @@ public class Control {
     }
 
     public static User getSelectedUser() {
-        if (selectedUser != null)
-            return selectedUser;
-        return null;
+        return selectedUser;
     }
 
-    public static void setCurrentImageView(Drawable imageView) {
-        current = imageView;
+    public static void setCurrentBitmap(Bitmap bitmap) {
+        current = bitmap;
     }
 
-    public static Drawable getCurrentImageView() {
+    public static Bitmap getCurrentBitmap() {
         return current;
     }
 
@@ -145,6 +144,12 @@ public class Control {
 
     public int[][] getBoardAsInt() {
         return board.turnStoneToIntArr();
+    }
+
+    public void updateUserAndAddPoint() {
+        UserTable userTable = new UserTable(gameUI);
+        selectedUser.setWins(selectedUser.getWins()+1);
+        userTable.updateByRow(selectedUser);
     }
 
 }

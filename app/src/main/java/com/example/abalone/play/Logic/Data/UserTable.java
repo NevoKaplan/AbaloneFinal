@@ -25,13 +25,14 @@ public class UserTable extends SQLiteOpenHelper {
     public static final String COLUMN_SURNAME = "Surname";
     public static final String COLUMN_EMAIL = "Email";
     public static final String COLUMN_IMAGE = "Image";
+    public static final String COLUMN_WINS = "Wins";
 
     SQLiteDatabase database;
 
     private final String CREATE_TABLE_PRODUCT = "CREATE TABLE IF NOT EXISTS " + TABLE_PRODUCT + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            COLUMN_NAME + " VARCHAR," + COLUMN_SURNAME + " VARCHAR," + COLUMN_EMAIL + " VARCHAR," + COLUMN_IMAGE + " BLOB" + ");";
+            COLUMN_NAME + " VARCHAR," + COLUMN_SURNAME + " VARCHAR," + COLUMN_EMAIL + " VARCHAR," + COLUMN_IMAGE + " BLOB," + COLUMN_WINS + " INTEGER" + ");";
 
-    String[] allColumns = {UserTable.COLUMN_ID, UserTable.COLUMN_NAME, UserTable.COLUMN_SURNAME, UserTable.COLUMN_EMAIL, UserTable.COLUMN_IMAGE};
+    String[] allColumns = {UserTable.COLUMN_ID, UserTable.COLUMN_NAME, UserTable.COLUMN_SURNAME, UserTable.COLUMN_EMAIL, UserTable.COLUMN_IMAGE, UserTable.COLUMN_WINS};
 
     public UserTable(Context context) {
         super(context, DATABASENAME, null, DATABASEVERSION);
@@ -67,7 +68,8 @@ public class UserTable extends SQLiteOpenHelper {
                 String address = cursor.getString(cursor.getColumnIndex(UserTable.COLUMN_EMAIL));
                 byte[] byteArray = cursor.getBlob(cursor.getColumnIndex(UserTable.COLUMN_IMAGE));
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-                User s = new User(fname, lname, address, bitmap,id);
+                int wins = cursor.getInt(cursor.getColumnIndex(UserTable.COLUMN_WINS));
+                User s = new User(fname, lname, address, bitmap, wins, id);
                 l.add(s);
             }
         }
@@ -83,19 +85,23 @@ public class UserTable extends SQLiteOpenHelper {
     }
 
     public long updateByRow(User s) {
-        this.open();
-        ContentValues values = new ContentValues();
-        values.put(UserTable.COLUMN_ID, s.getId());
-        values.put(UserTable.COLUMN_NAME, s.getName());
-        values.put(UserTable.COLUMN_SURNAME, s.getSurname());
-        values.put(UserTable.COLUMN_EMAIL, s.getEmail());
-        Bitmap temp = s.getImg();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        temp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-        values.put(UserTable.COLUMN_IMAGE, byteArray);
+        if (s != null) {
+            this.open();
+            ContentValues values = new ContentValues();
+            values.put(UserTable.COLUMN_ID, s.getId());
+            values.put(UserTable.COLUMN_NAME, s.getName());
+            values.put(UserTable.COLUMN_SURNAME, s.getSurname());
+            values.put(UserTable.COLUMN_EMAIL, s.getEmail());
+            values.put(UserTable.COLUMN_WINS, s.getWins());
+            Bitmap temp = s.getImg();
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            temp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            values.put(UserTable.COLUMN_IMAGE, byteArray);
 
-        return database.update(UserTable.TABLE_PRODUCT, values, UserTable.COLUMN_ID + "=" + s.getId(), null);
+            return database.update(UserTable.TABLE_PRODUCT, values, UserTable.COLUMN_ID + "=" + s.getId(), null);
+        }
+        return -1;
     }
 
     public User getStudentByID(long rowID) {
@@ -110,7 +116,8 @@ public class UserTable extends SQLiteOpenHelper {
             String address = cursor.getString(cursor.getColumnIndex(UserTable.COLUMN_EMAIL));
             byte[] byteArray = cursor.getBlob(cursor.getColumnIndex(UserTable.COLUMN_IMAGE));
             Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            User newUser = new User(fname, lname, address, bitmap, id);
+            int wins = cursor.getInt(cursor.getColumnIndex(UserTable.COLUMN_WINS));
+            User newUser = new User(fname, lname, address, bitmap, wins, id);
             this.close();
             return newUser;
         }
@@ -127,7 +134,7 @@ public class UserTable extends SQLiteOpenHelper {
         Canvas canvas = new Canvas(copy);
         canvas.drawBitmap(temp, 0, 0, null);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        copy.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        copy.compress(Bitmap.CompressFormat.JPEG, 70, stream);
         byte[] byteArray = stream.toByteArray();
         System.out.println("Bitmap (UserTable Temp): " + temp.getHeight() + ", " + temp.getWidth());
         System.out.println("Bitmap (UserTable Copy): " + copy.getHeight() + ", " + copy.getWidth());

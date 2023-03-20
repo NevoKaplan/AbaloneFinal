@@ -10,6 +10,7 @@ public class User {
     private String surname;
     private String email;
     private Bitmap img;
+    private int wins;
 
     public User(String name, String surname, String email, Bitmap bitmap) {
         counter++;
@@ -18,14 +19,16 @@ public class User {
         this.email = email;
         this.img = bitmap;
         this.id = counter;
+        this.wins = 0;
     }
 
-    public User(String name, String surname, String email, Bitmap bitmap, long id) {
+    public User(String name, String surname, String email, Bitmap bitmap, int win, long id) {
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.img = bitmap;
         this.id = id;
+        this.wins = win;
     }
 
     public static int getCounter() {
@@ -70,5 +73,13 @@ public class User {
 
     public void setImg(Bitmap img) {
         this.img = img;
+    }
+
+    public int getWins() {
+        return this.wins;
+    }
+
+    public void setWins(int _wins) {
+        this.wins = _wins;
     }
 }

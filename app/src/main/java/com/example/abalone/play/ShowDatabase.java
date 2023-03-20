@@ -1,4 +1,4 @@
-package com.example.abalone.play.Logic.Data;
+package com.example.abalone.play;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -18,6 +18,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.abalone.R;
 import com.example.abalone.play.Control.Control;
+import com.example.abalone.play.Logic.Data.User;
+import com.example.abalone.play.Logic.Data.UserAdapter;
+import com.example.abalone.play.Logic.Data.UserTable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,11 +98,8 @@ public class ShowDatabase extends AppCompatActivity {
         dialog = new Dialog(this);
         dialog.setContentView(R.layout.custom_dialog);
         dialog.findViewById(R.id.update).setOnClickListener(this::clickDialog);
-        dialog.findViewById(R.id.delete_button).setOnClickListener(this::clickDialog);
         dialog.setTitle("Update Student");
         ((TextView)dialog.findViewById(R.id.textView)).setText("Update Student");
-        ((TextView)dialog.findViewById(R.id.buttonText)).setText("Update");
-        ((TextView)dialog.findViewById(R.id.givenID)).setText("Given User ID: " + user.getId());
         ((TextView)dialog.findViewById(R.id.FirstNameTextBox)).setText(user.getName());
         ((TextView)dialog.findViewById(R.id.SurnameTextBox)).setText(user.getSurname());
         ((TextView)dialog.findViewById(R.id.EmailTextBox)).setText(user.getEmail());
@@ -112,17 +112,10 @@ public class ShowDatabase extends AppCompatActivity {
         long userId = Long.parseLong((((TextView) v.findViewById(R.id.sId)).getText().toString()));
         user = userTable.getStudentByID(userId);
 
-        Intent intent = getIntent();
-        boolean isSignIn = intent.getBooleanExtra("forSigningIn", false);
         Log.i("HelloListView", "You clicked Item: " + id + " at position:" + position);
-        if (isSignIn) {
-            Control.setSelectedUser(user);
-            Toast.makeText(this, user.getSurname() + " selected", Toast.LENGTH_SHORT).show();
-            onBackPressed();
-        } else {
-            updateCaller();
-            onBegin();
-        }
+        Control.setSelectedUser(user);
+        Toast.makeText(this, user.getName() + " " + user.getSurname() + " selected", Toast.LENGTH_LONG).show();
+        onBackPressed();
     }
 
     public void updateCaller() {
