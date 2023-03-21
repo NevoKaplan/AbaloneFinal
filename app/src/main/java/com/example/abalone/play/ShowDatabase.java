@@ -27,7 +27,6 @@ import java.util.ArrayList;
 
 public class ShowDatabase extends AppCompatActivity {
 
-    private Dialog dialog;
     private static final int PICK_IMAGE_REQUEST = 1;
     private User user;
     ArrayList<User> list;
@@ -51,63 +50,6 @@ public class ShowDatabase extends AppCompatActivity {
         onBackPressed();
     }
 
-    private void openFileChooser() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
-            Uri uri = data.getData();
-
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                //ImageView imageView = findViewById(R.id.image_view);
-                   // imageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public User clickDialog(View view) {
-        if (view.getId() == R.id.update) {
-            /*if (!((TextView) dialog.findViewById(R.id.FirstNameTextBox)).getText().toString().matches("") && !((TextView) dialog.findViewById(R.id.SurnameTextBox)).getText().toString().matches("") && !((TextView) dialog.findViewById(R.id.EmailTextBox)).getText().toString().matches("") && !((TextView) dialog.findViewById(R.id.avgTextBox)).getText().toString().matches("")) {
-                         user.setName(((TextView) dialog.findViewById(R.id.FirstNameTextBox)).getText().toString());
-                        user.setSurname(((TextView) dialog.findViewById(R.id.SurnameTextBox)).getText().toString());
-                        user.setEmail(((TextView) dialog.findViewById(R.id.EmailTextBox)).getText().toString());
-                        dialog.dismiss();
-                        userTable.updateByRow(user);
-                        userTable.close();
-                        return user;
-            } else {
-                Toast.makeText(this, "Must fill all fields", Toast.LENGTH_SHORT).show();
-            }*/
-        }
-        return null;
-    }
-
-    public void createDialog() {
-        dialog = new Dialog(this);
-        dialog.setContentView(R.layout.custom_dialog);
-        dialog.findViewById(R.id.update).setOnClickListener(this::clickDialog);
-        dialog.setTitle("Update Student");
-        ((TextView)dialog.findViewById(R.id.textView)).setText("Update Student");
-        ((TextView)dialog.findViewById(R.id.FirstNameTextBox)).setText(user.getName());
-        ((TextView)dialog.findViewById(R.id.SurnameTextBox)).setText(user.getSurname());
-        ((TextView)dialog.findViewById(R.id.EmailTextBox)).setText(user.getEmail());
-        ((ImageView)dialog.findViewById(R.id.userImage)).setImageBitmap(user.getImg());
-        dialog.setCancelable(true);
-        dialog.show();
-    }
-
     public void onItemClick(AdapterView<?> l, View v, int position, long id) {
         long userId = Long.parseLong((((TextView) v.findViewById(R.id.sId)).getText().toString()));
         user = userTable.getStudentByID(userId);
@@ -116,14 +58,6 @@ public class ShowDatabase extends AppCompatActivity {
         Control.setSelectedUser(user);
         Toast.makeText(this, user.getName() + " " + user.getSurname() + " selected", Toast.LENGTH_LONG).show();
         onBackPressed();
-    }
-
-    public void updateCaller() {
-        if (user != null) {
-            createDialog();
-        } else {
-            Toast.makeText(this, "ID number not found", Toast.LENGTH_SHORT).show();
-        }
     }
 
     public void onBegin() {
@@ -135,7 +69,4 @@ public class ShowDatabase extends AppCompatActivity {
         lv.setOnItemClickListener(this::onItemClick);
     }
 
-    public static void restartActivity(Context context) {
-
-    }
 }

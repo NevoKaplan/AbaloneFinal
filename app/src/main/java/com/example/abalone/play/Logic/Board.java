@@ -1,7 +1,10 @@
 package com.example.abalone.play.Logic;
 
+import android.util.Log;
+
 import com.example.abalone.play.Control.Control;
 import com.example.abalone.play.Control.Layouts;
+import com.example.abalone.play.GameActivity;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -201,30 +204,38 @@ public class Board {
             ai = AI.getInstance(player * -1);
             AiTurn = true;
             player *= -1;
-            AIBoard aiBoard = ai.bestMove(this);
 
+            AiThread aiThread = new AiThread(this, control.getGameUI());
+            aiThread.start();
 
-            ArrayList<Stone>[] madeMove = aiBoard.getMadeMove();
-            System.out.println("MadeMove: ");
-            for (int i = 0; i < 2; i++) {
-                if (i == 0)
-                    System.out.println("Before: ");
-                else
-                    System.out.println("After: ");
-                for (Stone s: madeMove[i]) {
-                    System.out.println(s);
-                }
-            }
-            Stone.reverseList(madeMove[0]);
-            control.makeInvisible(madeMove[0], madeMove[1]);
-            updateBoardWithAI(aiBoard);
-            AiTurn = false;
             return true;
         }
         else {
             player *= -1;
             return false;
         }
+    }
+
+    public class AiThread extends Thread {
+
+        private Board tempBoard;
+        private GameActivity mainActivity;
+
+        public AiThread(Board _tempBoard, GameActivity _mainActivity) {
+            this.tempBoard = _tempBoard;
+            this.mainActivity = _mainActivity;
+        }
+
+        public void run() {
+            AIBoard aiBoard = ai.bestMove(tempBoard);
+            ArrayList<Stone>[] madeMove = aiBoard.getMadeMove();
+            Stone.reverseList(madeMove[0]);
+            this.mainActivity.runOnUiThread(() -> {
+                control.makeInvisible(madeMove[0], madeMove[1]);
+                updateBoardWithAI(aiBoard);
+            });
+            AiTurn = false;
+        } // run()
     }
 
     // starts the pushing functions

@@ -70,6 +70,9 @@ public class Control {
         return currentStone;
     }
 
+    public GameActivity getGameUI() {
+        return this.gameUI;
+    }
 
     public boolean setCurrentStone(Stone currentStone) {
         this.currentStone = currentStone;

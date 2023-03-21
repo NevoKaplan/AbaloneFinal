@@ -15,4 +15,9 @@
         android:title="set notification"
         android:orderInCategory="3"/>
 
+    <item
+        android:id="@+id/bibi"
+        android:title="Bibi's Adventure"
+        android:orderInCategory="4"/>
+
 </menu>

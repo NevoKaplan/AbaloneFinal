@@ -248,7 +248,7 @@ public class GameActivity extends AppCompatActivity {
     public void gettingStone(View view) {
         int row = (int)view.getTag()/board.hex.length;
         int col = (int)view.getTag()%board.hex.length;
-        if (!(board.selectedSize == 0 && board.hex[row][col].getMainNum() != board.getPlayer())) {
+        if (!(board.selectedSize == 0 && board.hex[row][col].getMainNum() != board.getPlayer()) && AiTurn != 1) {
             if (control.setCurrentStone(board.hex[row][col])) {
 
             }

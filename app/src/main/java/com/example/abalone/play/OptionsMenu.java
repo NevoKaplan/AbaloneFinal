@@ -56,7 +56,6 @@ public class OptionsMenu extends PopupMenu {
         switch(id) {
             case R.id.log:
                 if (!isLoggedIn) {
-                    intent.putExtra("forSigningIn", true);
                     context.startActivity(intent);
                 }
                 break;
@@ -65,6 +64,9 @@ public class OptionsMenu extends PopupMenu {
                 break;
             case R.id.notification:
                 popTimePicker();
+                break;
+            case R.id.bibi:
+                goToSite();
                 break;
             default:
                 break;
@@ -170,5 +172,15 @@ public class OptionsMenu extends PopupMenu {
             return true;
         }
         return false;
+    }
+
+    private void goToSite () {
+        goToUrl ("https://nevokaplan4.wixsite.com/bibis-adventure");
+    }
+
+    private void goToUrl (String url) {
+        Uri uriUrl = Uri.parse(url);
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        context.startActivity(launchBrowser);
     }
 }

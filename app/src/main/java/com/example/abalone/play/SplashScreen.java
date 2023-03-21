@@ -35,6 +35,17 @@ public class SplashScreen extends AppCompatActivity {
             }
 
         }, 2000);
+
+        // Set an onClickListener on the SplashScreen layout to cancel the delay and start the activity
+        findViewById(R.id.splash_screen_layout).setOnClickListener(v -> {
+            // Remove the delayed code from the Handler's queue
+            handler.removeCallbacksAndMessages(null);
+
+            // Start the activity
+            Intent intent = new Intent(SplashScreen.this, ContinueActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void init() {
