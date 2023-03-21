@@ -1,6 +1,8 @@
 package com.example.abalone.play.Logic;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class AI {
@@ -112,6 +114,14 @@ public class AI {
                 fina.add(board);
             }
         }
+
+        // Sort the 'fina' ArrayList by 'Val'
+        fina.sort((b1, b2) -> Integer.compare(b2.getVal(), b1.getVal()));
+
+        // Keep only the top 24  with the highest 'Val'
+        if (fina.size() > 24)
+            fina.subList(0, 24).clear();
+
         return fina;
     }
 
