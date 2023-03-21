@@ -3,6 +3,7 @@ package com.example.abalone.play;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -64,12 +65,15 @@ public class forUserSelect extends AppCompatActivity {
     private void showImageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Image");
+        builder.setCancelable(false);
         builder.setItems(new CharSequence[]{"Camera", "Gallery"}, (dialog, which) -> {
             switch (which) {
                 case 0:
                     if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                            // Set orientation hint for the camera
+                            takePictureIntent.putExtra(MediaStore.EXTRA_SCREEN_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                             cameraLauncher.launch(takePictureIntent);
                         }
                     } else {
@@ -88,6 +92,7 @@ public class forUserSelect extends AppCompatActivity {
         });
         builder.show();
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -109,7 +114,7 @@ public class forUserSelect extends AppCompatActivity {
     private Bitmap rotateAndFlipImage(Bitmap bitmap) {
         Matrix matrix = new Matrix();
         matrix.postRotate(-90); // Rotate the image by 90 degrees
-        //matrix.postScale(-1, 1); // Flip the image horizontally
+        matrix.postScale(-1, 1); // Flip the image horizontally
 
         Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         bitmap.recycle(); // Free up memory used by the original bitmap

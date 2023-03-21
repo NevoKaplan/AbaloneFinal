@@ -4,19 +4,75 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Mains.SplashScreen">
+    android:background="#1E1E1E"
+    tools:context=".play.SplashScreen">
 
     <ImageView
         android:id="@+id/circle"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:background="@drawable/abalone_logo"
+        android:layout_width="175dp"
+        android:layout_height="250dp"
+        android:background="@drawable/abalone_logo_round"
         android:contentDescription="LOGO"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.55">
 
     </ImageView>
+
+    <View
+        android:id="@+id/first_line"
+        android:layout_width="20dp"
+        android:layout_height="185dp"
+        android:layout_marginEnd="48dp"
+        android:background="#FEFEFE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/second_line"
+        android:layout_width="20dp"
+        android:layout_height="250dp"
+        android:layout_marginEnd="8dp"
+        android:background="#0D0E12"
+        app:layout_constraintEnd_toStartOf="@+id/first_line"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/third_line"
+        android:layout_width="20dp"
+        android:layout_height="210dp"
+        android:layout_marginEnd="8dp"
+        android:background="#FEFEFE"
+        app:layout_constraintEnd_toStartOf="@+id/second_line"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/fourth_line"
+        android:layout_width="20dp"
+        android:layout_height="300dp"
+        android:layout_marginEnd="8dp"
+        android:background="#0D0E12"
+        app:layout_constraintEnd_toStartOf="@+id/third_line"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/fifth_line"
+        android:layout_width="20dp"
+        android:layout_height="150dp"
+        android:layout_marginEnd="8dp"
+        android:background="#FEFEFE"
+        app:layout_constraintEnd_toStartOf="@+id/fourth_line"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/sixth_line"
+        android:layout_width="20dp"
+        android:layout_height="90dp"
+        android:layout_marginEnd="8dp"
+        android:background="#0D0E12"
+        app:layout_constraintEnd_toStartOf="@+id/fifth_line"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
