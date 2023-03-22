@@ -204,7 +204,8 @@ public class Board {
             ai = AI.getInstance(player * -1);
             AiTurn = true;
             player *= -1;
-
+            if (control == null)
+                control = Control.getInstance();
             AiThread aiThread = new AiThread(this, control.getGameUI());
             aiThread.start();
 

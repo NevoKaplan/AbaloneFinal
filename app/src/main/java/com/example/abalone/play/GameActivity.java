@@ -128,7 +128,15 @@ public class GameActivity extends AppCompatActivity {
             guestImgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
         else
             guestImgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.robot_thinking);
+
         changePlayerImage(board.getPlayer());
+        if (AiTurn == 1) {
+            board.setPlayer(1);
+            if (control.AIMoveMaybe(AiTurn)) { // check if there's AI and if so then make move
+                updateBoard();
+            }
+            checkWin();
+        }
     }
 
     private void setUpBoardFromSavedState() {
@@ -259,7 +267,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void afterPieceMovement() {
-        // creates infinite loop after AI turn - need to fix
         updateBoard();
         changePlayerImage(board.getPlayer() * -1);
         AiTurn *= -1;

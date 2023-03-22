@@ -288,32 +288,12 @@ public class AIBoard extends Board {
                 break;
         }
 
-        boolean flag = false;
-        for (int i = 0; i < madeMove[0].size(); i++) {
-            if (madeMove[0].get(i).row == 3 && madeMove[0].get(i).col == 5)
-                flag = true;
-        }
-        /*if (flag) {
-            for (int i = 0; i < 2; i++) {
-                if (i == 0)
-                    System.out.println("Selected: ");
-                else
-                    System.out.println("To be: ");
-                for (Stone stone : madeMove[i]) {
-                    System.out.println(stone);
-                }
-            }
-        }
-        System.out.println("deadBlue: " + deadBlue + ", pre: " + preDeadBlue);*/
-        boolean flag3 = false;
         if (deadBlue > preDeadBlue) {
             System.out.println("IT DOES WORK1");
             if (player == -1)
                 sum *= 10;
             else
                 sum /= 5;
-            if (sum > 300)
-                flag3 = true;
         }
         if (deadRed > preDeadRed) {
             System.out.println("IT DOES WORK2");
