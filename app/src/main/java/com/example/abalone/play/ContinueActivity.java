@@ -70,7 +70,7 @@ public class ContinueActivity extends AppCompatActivity {
     public void menuSetUp() {
         ImageView imageView = findViewById(R.id.menu);
         imageView.setOnClickListener(view -> {
-            OptionsMenu optionsMenu = new OptionsMenu(ContinueActivity.this, imageView);
+            OptionsMenu optionsMenu = new OptionsMenu(ContinueActivity.this, imageView, getSupportFragmentManager());
             optionsMenu.show();
         });
     }

@@ -483,7 +483,7 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
     public void menuSetUp() {
         ImageView imageView = findViewById(R.id.menu);
         imageView.setOnClickListener(view -> {
-            OptionsMenu optionsMenu = new OptionsMenu(ChooseActivity.this, imageView);
+            OptionsMenu optionsMenu = new OptionsMenu(ChooseActivity.this, imageView, getSupportFragmentManager());
             optionsMenu.show();
         });
     }

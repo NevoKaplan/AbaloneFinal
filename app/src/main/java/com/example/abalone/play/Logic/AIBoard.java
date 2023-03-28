@@ -288,19 +288,22 @@ public class AIBoard extends Board {
                 break;
         }
 
-        if (deadBlue > preDeadBlue) {
+        int deadB = deadBlue - preDeadBlue;
+        if (deadB >= 1) {
             System.out.println("IT DOES WORK1");
             if (player == -1)
-                sum *= 10;
+                sum *= 10 * deadB;
             else
-                sum /= 5;
+                sum /= 5 * deadB;
         }
-        if (deadRed > preDeadRed) {
+
+        int deadR = deadRed - preDeadRed;
+        if (deadR >= 1) {
             System.out.println("IT DOES WORK2");
             if (player == 1)
-                sum *= 10;
+                sum *= 10 * deadR;
             else
-                sum /= 5;
+                sum /= 5 * deadR;
         }
         return sum * player;
     }

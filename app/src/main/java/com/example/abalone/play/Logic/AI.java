@@ -119,8 +119,8 @@ public class AI {
         fina.sort((b1, b2) -> Integer.compare(b2.getVal(), b1.getVal()));
 
         // Keep only the top 24  with the highest 'Val'
-        if (fina.size() > 24)
-            fina.subList(0, 24).clear();
+        if (fina.size() > 34)
+            fina.subList(0, 34).clear();
 
         return fina;
     }

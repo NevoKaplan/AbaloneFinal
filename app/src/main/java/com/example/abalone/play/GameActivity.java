@@ -454,7 +454,6 @@ public class GameActivity extends AppCompatActivity {
         editor.apply();
 
         String winText;
-
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.custom_win_dialog);
         ImageView imageView = dialog.findViewById(R.id.playerImage);
@@ -466,9 +465,13 @@ public class GameActivity extends AppCompatActivity {
             }
         }
         else {
-            winText = "Guest Won!!";
-            imageView.setImageBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.default_image));
+            if (AiTurn != 0)
+                winText = "Bot Won!!";
+            else
+                winText = "Guest Won!!";
+            imageView.setImageBitmap(guestImgBitmap);
         }
+
         dialog.setTitle(winText);
         dialog.findViewById(R.id.gloryButton).setOnClickListener(this::endActivity);
         ((TextView)dialog.findViewById(R.id.winText)).setText(winText);
@@ -498,7 +501,7 @@ public class GameActivity extends AppCompatActivity {
     public void menuSetUp() {
         ImageView imageView = findViewById(R.id.menu);
         imageView.setOnClickListener(view -> {
-            OptionsMenu optionsMenu = new OptionsMenu(GameActivity.this, imageView);
+            OptionsMenu optionsMenu = new OptionsMenu(GameActivity.this, imageView, getSupportFragmentManager());
             optionsMenu.show();
         });
     }
