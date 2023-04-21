@@ -1,7 +1,8 @@
+// Import necessary libraries
 package com.example.abalone.play;
 
+// Import necessary classes and packages
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,11 +10,12 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.TextView;
 import com.example.abalone.R;
 
+// Define SplashScreen class that extends AppCompatActivity
 public class SplashScreen extends AppCompatActivity {
 
+    // Declare private instance variables
     View first, second, third, fourth, fifth, sixth;
     ImageView circle;
     Animation topAnimation, bottomAnimation, zoomAnimation;
@@ -23,9 +25,14 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+
+        // Initialize variables and animations
         init();
 
+        // Create a new handler
         handler = new Handler();
+
+        // Post a delayed Runnable to start the ContinueActivity after 2 seconds
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -33,7 +40,6 @@ public class SplashScreen extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             }
-
         }, 2000);
 
         // Set an onClickListener on the SplashScreen layout to cancel the delay and start the activity
@@ -48,6 +54,7 @@ public class SplashScreen extends AppCompatActivity {
         });
     }
 
+    // Define the init() method to initialize the animations and views
     private void init() {
         topAnimation = AnimationUtils.loadAnimation(this, R.anim.top_animation);
         bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.bottom_animation);
@@ -60,6 +67,7 @@ public class SplashScreen extends AppCompatActivity {
         fifth = findViewById(R.id.fifth_line);
         sixth = findViewById(R.id.sixth_line);
 
+        // Set topAnimation to all views in arr
         View[] arr = {first, second, third, fourth, fifth, sixth};
         for (View v : arr) v.setAnimation(topAnimation);
 

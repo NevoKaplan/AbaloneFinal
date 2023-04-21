@@ -3,7 +3,6 @@ package com.example.abalone.play;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -23,91 +22,68 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.abalone.R;
 import com.example.abalone.play.Control.Layouts;
-import com.example.abalone.play.Logic.MyMenu;
 import com.example.abalone.play.Recycler.CustomAdapter;
 import com.example.abalone.play.Recycler.SpacesItemDecoration;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ChooseActivity extends AppCompatActivity implements MyMenu {
+public class ChooseActivity extends AppCompatActivity {
 
+    // Declare variables
     private int bluePiece, redPiece;
-    private final ArrayList<int[][]> layouts = Layouts.allLayouts();
-    private final int boardsAmount = layouts.size();
-    private final ImageView[][][] boards = new ImageView[boardsAmount][9][9];
-    private final int[][][] idArray = new int[boardsAmount][9][9];
-    private final ImageView[] realBoards = new ImageView[boardsAmount];
+    private final ArrayList<int[][]> layouts = Layouts.allLayouts(); // Array list of layouts
+    private final int boardsAmount = layouts.size(); // Number of layouts
+    private final ImageView[][][] boards = new ImageView[boardsAmount][9][9]; // 3D array of ImageViews for the boards
+    private final int[][][] idArray = new int[boardsAmount][9][9]; // 3D array of IDs for the boards
+    private final ImageView[] realBoards = new ImageView[boardsAmount]; // Array of ImageViews for the real boards
 
-    private final int positionOffset = -106;
+    private final int positionOffset = -106; // Offset for positions
 
-    private CustomAdapter adapter;
+    private CustomAdapter adapter; // Adapter for RecyclerView
 
-    static Random rnd = new Random();
+    static Random rnd = new Random(); // Random object
 
-    private boolean aiActivated;
+    private boolean aiActivated; // Flag to indicate if AI is activated
 
+    // Array of possible drawable resources
     private final int[] possible = {R.drawable.marble_blue, R.drawable.marble_red,
             R.drawable.marble_gray, R.drawable.marble_white,
             R.drawable.checkers_brown, R.drawable.checkers_blue,
             R.drawable.checkers_white, R.drawable.checkers_gray,
             R.drawable.cyan_space, R.drawable.red_space};
 
-
+    // onCreate method
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose_layout);
 
-        bluePiece = R.drawable.marble_blue;
-        redPiece = R.drawable.marble_red;
+        bluePiece = R.drawable.marble_blue; // Set blue piece drawable
+        redPiece = R.drawable.marble_red; // Set red piece drawable
 
-        ArrayList<Drawable> lst = arrToList();
-        adapter = new CustomAdapter(lst);
+        ArrayList<Drawable> lst = arrToList(); // Convert array to list of Drawables
+        adapter = new CustomAdapter(lst); // Create CustomAdapter object
 
-        onBegin();
-        onChange();
-        arrowAnimations();
+        onBegin(); // Call onBegin method
+        onChange(); // Call onChange method
+        arrowAnimations(); // Call arrowAnimations method
 
-        System.out.println("I AM HERE CURRENTLY");
-
+        System.out.println("I AM HERE CURRENTLY"); // Print message to console
     }
 
-    /*@Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onResume();
-        View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
-    }*/
-
-    public void onClick2(View view) {
-        int[] possible = {R.drawable.marble_blue, R.drawable.marble_red,
-                R.drawable.marble_gray, R.drawable.marble_white,
-                R.drawable.checkers_brown, R.drawable.checkers_blue,
-                R.drawable.checkers_white, R.drawable.checkers_gray,
-                R.drawable.cyan_space, R.drawable.red_space};
-
-        int num = rnd.nextInt(possible.length);
-        bluePiece = possible[num];
-        int n;
-        do {
-            n = rnd.nextInt(possible.length);
-        } while(n == num);
-        redPiece = possible[n];
-        onChange();
-    }
-
+    // Method to handle switch state changes
     private void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        aiActivated = isChecked;
+        aiActivated = isChecked; // Set aiActivated flag
     }
 
+    // Method to handle button clicks
     public void onClick4(View view) {
-        Intent intent = new Intent(this, GameActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putInt("bluePiece", bluePiece);
-        bundle.putInt("redPiece", redPiece);
+        Intent intent = new Intent(this, GameActivity.class); // Create intent for GameActivity
+        Bundle bundle = new Bundle(); // Create bundle object
+        bundle.putInt("bluePiece", bluePiece); // Add bluePiece to bundle
+        bundle.putInt("redPiece", redPiece); // Add redPiece to bundle
         int layoutNum;
-        switch (view.getId()) {
+        switch (view.getId()) { // Switch statement to determine which board was clicked
             case R.id.board1:
                 layoutNum = 1;
                 break;
@@ -136,8 +112,8 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
                 layoutNum = rnd.nextInt(boardsAmount) + 1;
                 break;
         }
-        bundle.putInt("layoutNum", layoutNum);
-        bundle.putBoolean("activateAI", aiActivated);
+        bundle.putInt("layoutNum", layoutNum); // Add layoutNum to bundle
+        bundle.putBoolean("activateAI", aiActivated); // Add aiActivated flag to bundle
         intent.putExtra("bundle", bundle);
         startActivity(intent);
         finish();
@@ -145,19 +121,18 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
 
 
     private void onBegin() {
-
+        // Get the RecyclerViews and start threads to set them up
         RecyclerView recyclerViewTop = findViewById(R.id.recyclerViewTop);
         Thread setUpTopRecycler = new Thread(new firstThread(recyclerViewTop, true));
-
         RecyclerView recyclerViewBottom = findViewById(R.id.recyclerViewBottom);
         Thread setUpBottomRecycler = new Thread(new firstThread(recyclerViewBottom, false));
-        //setRecycler(recyclerViewBottom, false);
-        //setRecycler(recyclerViewTop, true);
         setUpTopRecycler.start();
         setUpBottomRecycler.start();
 
+        // Set up the menu
         menuSetUp();
 
+        // Get the image views for the boards and create the boards
         realBoards[0] = findViewById(R.id.board1);
         realBoards[1] = findViewById(R.id.board2);
         realBoards[2] = findViewById(R.id.board3);
@@ -166,18 +141,17 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
         realBoards[5] = findViewById(R.id.board6);
         realBoards[6] = findViewById(R.id.board7);
         realBoards[7] = findViewById(R.id.board8);
-
         int size = (int)((realBoards[0].getLayoutParams().width * 0.97)/9);
         int i = 0;
         for (int[][] placeAcc : layouts) {
             createBoard(size, realBoards[i], placeAcc, i);
-
-            // set onClick
+            // Set an onClickListener for each board
             realBoards[i].setOnClickListener(this::onClick4);
             i++;
         }
         aiActivated = false;
 
+        // Set up the click listeners for the buttons and the switch
         findViewById(R.id.shuffle).setOnClickListener(this::onClick4);
         findViewById(R.id.topRightArrow).setOnClickListener(this::onArrowClick);
         findViewById(R.id.topLeftArrow).setOnClickListener(this::onArrowClick);
@@ -187,8 +161,8 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
         switch1.setOnCheckedChangeListener(this::onCheckedChanged);
     }
 
+    // Runnable class for setting up a RecyclerView
     private class firstThread implements Runnable {
-
         RecyclerView recycler;
         boolean top;
 
@@ -199,28 +173,28 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
 
         @Override
         public void run() {
+            // Set the adapter for the RecyclerView
             recycler.setAdapter(adapter);
-
             SpacesItemDecoration dividerItemDecoration = new SpacesItemDecoration(16);
 
-            LinearLayoutManager layoutManager
-                    = new LinearLayoutManager(this.recycler.getContext(), LinearLayoutManager.HORIZONTAL, false);
-
+            // Set the LinearLayoutManager and add a scroll listener to the RecyclerView
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this.recycler.getContext(), LinearLayoutManager.HORIZONTAL, false);
             recycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    // Select the middle item and update the view
                     recyclerView.post(() -> selectMiddleItem(recyclerView, top));
                     onChange();
                 }
             });
 
+            // Set up a LinearSnapHelper and attach it to the RecyclerView
             LinearSnapHelper snapHelper = new LinearSnapHelper() {
                 @Override
                 public int findTargetSnapPosition(RecyclerView.LayoutManager layoutManager, int velocityX, int velocityY) {
                     View centerView = findSnapView(layoutManager);
                     if (centerView == null)
                         return RecyclerView.NO_POSITION;
-
                     int position = layoutManager.getPosition(centerView);
                     int targetPosition = -1;
                     if (layoutManager.canScrollHorizontally()) {
@@ -258,33 +232,45 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
     }
 
     public ArrayList<Drawable> arrToList() {
-
+        // Create an empty ArrayList of Drawable objects
         ArrayList<Drawable> list = new ArrayList<>();
+        // For each integer in the possible array, get the corresponding Drawable and add it to the list
         for (int stoneImg : possible)
             list.add(ContextCompat.getDrawable(this, stoneImg));
-
+        // Return the completed list
         return list;
     }
 
     private void onChange() {
+        // Initialize a counter variable i to 0
         int i = 0;
+        // Iterate over each hexagon layout and corresponding image view array
         for (int[][] hex : layouts) {
+            // Call the update function for the current layout and image view array
             update(hex, boards[i]);
+            // Increment i to move on to the next layout and image view array
             i++;
         }
-
     }
 
     private void update(int[][] hex, ImageView[][] imageViews) {
+        // Set the number of rows and columns to iterate through to 9
         int rows = 9, cols = 9;
+        // Iterate over each hexagon in the layout
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
+                // Get the number representing the current hexagon from the layout
                 int num = hex[i][j];
+                // If the hexagon is not empty and its corresponding image view exists
                 if (num != 4 && imageViews[i][j] != null) {
+                    // If the hexagon represents a blue piece
                     if (num == 1) {
+                        // Set the image resource of the image view to the blue piece
                         imageViews[i][j].setImageResource(bluePiece);
                     }
+                    // If the hexagon represents a red piece
                     else if (num == -1) {
+                        // Set the image resource of the image view to the red piece
                         imageViews[i][j].setImageResource(redPiece);
                     }
                 }
@@ -293,23 +279,31 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
     }
 
     private void createBoard(int size, ImageView frame, int[][] tempHex, int index) {
-
+        // Get the constraint layout for the activity
         ConstraintLayout layout = findViewById(R.id.cons);
-
+        // Request a layout update
         layout.requestLayout();
+        // Create a new ConstraintSet to modify the layout constraints
         ConstraintSet cs = new ConstraintSet();
-
+        // Iterate over each row of the hexagon layout
         for (int iRow = 0; iRow < tempHex.length; iRow++) {
+            // Iterate over each hexagon in the current row
             for (int iCol = 0; iCol < tempHex[iRow].length; iCol++) {
+                // If the hexagon is not empty
                 if (tempHex[iRow][iCol] != 4) {
+                    // Create a new image view for the hexagon
                     ImageView imageView = new ImageView(this);
-
+                    // Set the layout parameters for the image view
                     ConstraintLayout.LayoutParams lp =
                             new ConstraintLayout.LayoutParams(size, size);
+                    // Generate a unique ID for the image view
                     int id = View.generateViewId();
+                    // If the current hexagon is in the top row
                     if (iRow == 0) {
+                        // Set the top margin of the image view to 1/60th of the height of the frame image view
                         lp.topMargin = frame.getLayoutParams().height / 60;
                     }
+                    // Add the ID of the image view to the ID array for the current board and hexagon
                     idArray[index][iRow][iCol] = id;
                     imageView.setId(id);
                     layout.addView(imageView, lp);
@@ -353,69 +347,91 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
 
     }
 
+    // This method selects the middle item in a RecyclerView and scrolls to it
+// recycler: The RecyclerView to select the middle item in
+// top: Whether the RecyclerView is the top one (true) or the bottom one (false)
     private void selectMiddleItem(RecyclerView recycler, boolean top) {
-        LinearLayoutManager layoutManager = (LinearLayoutManager)recycler.getLayoutManager();
-
+// Get the layout manager for the RecyclerView
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recycler.getLayoutManager();
+        // Find the first and last completely visible items in the layout
         int findMiddleLeft = layoutManager.findFirstCompletelyVisibleItemPosition();
         int findMiddleRight = layoutManager.findLastCompletelyVisibleItemPosition();
+
+// If there is only one completely visible item, select it and return
         if (findMiddleLeft == findMiddleRight) {
-            prechange(top, findMiddleRight );
+            prechange(top, findMiddleRight);
             return;
         }
 
+// Get the indices of the first and last visible items
         int firstVisibleIndex = layoutManager.findFirstVisibleItemPosition();
-        int lastVisibleIndex =  layoutManager.findLastVisibleItemPosition();
+        int lastVisibleIndex = layoutManager.findLastVisibleItemPosition();
 
+// Iterate through all the visible items in the layout
         for (int i = firstVisibleIndex; i < lastVisibleIndex; i++) {
+            // Get the ViewHolder for the current item
             RecyclerView.ViewHolder vh = recycler.findViewHolderForLayoutPosition(i);
 
+            // Get the screen location of the item
             int[] location = new int[2];
             vh.itemView.getLocationOnScreen(location);
             int x = location[0];
-            int halfWidth = (int)(vh.itemView.getWidth() * .5);
+            int halfWidth = (int) (vh.itemView.getWidth() * .5);
             int rightSide = x + halfWidth;
             int leftSide = x - halfWidth;
+
+            // Check if the item is in the middle of the screen
             int screenWidth = getScreenWidth();
             boolean isInMiddle = screenWidth * .5 >= leftSide && screenWidth * .5 < rightSide;
 
+            // If the item is in the middle of the screen, select it and return
             if (isInMiddle) {
-                // "i" is your middle index and implement selecting it as you want
-                // optionsAdapter.selectItemAtIndex(i);
                 prechange(top, i);
                 return;
             }
         }
     }
 
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    @SuppressLint("NonConstantResourceId")
-    public void onArrowClick(View view) {
-        switch (view.getId()) {
-            case R.id.topRightArrow:
-                moveTheSelection(findViewById(R.id.recyclerViewTop), 1, true);
-                break;
-            case R.id.topLeftArrow:
-                moveTheSelection(findViewById(R.id.recyclerViewTop), -1, true);
-                break;
-            case R.id.bottomRightArrow:
-                moveTheSelection(findViewById(R.id.recyclerViewBottom), 1, false);
-                break;
-            case R.id.bottomLeftArrow:
-                moveTheSelection(findViewById(R.id.recyclerViewBottom), -1, false);
-                break;
-            default:
-                break;
+// Get the width of the screen in pixels
+        public static int getScreenWidth() {
+            return Resources.getSystem().getDisplayMetrics().widthPixels;
         }
-    }
 
-    public void moveTheSelection(RecyclerView recycler, int right, boolean top) {
-        LinearLayoutManager layoutManager = (LinearLayoutManager)(recycler.getLayoutManager());
-        int pos = layoutManager.findFirstCompletelyVisibleItemPosition(), dx = right;
+// This method is called when an arrow button is clicked
+// view: The button that was clicked
+        public void onArrowClick(View view) {
+            switch (view.getId()) {
+                case R.id.topRightArrow:
+                    moveTheSelection(findViewById(R.id.recyclerViewTop), 1, true);
+                    break;
+                case R.id.topLeftArrow:
+                    moveTheSelection(findViewById(R.id.recyclerViewTop), -1, true);
+                    break;
+                case R.id.bottomRightArrow:
+                    moveTheSelection(findViewById(R.id.recyclerViewBottom), 1, false);
+                    break;
+                case R.id.bottomLeftArrow:
+                    moveTheSelection(findViewById(R.id.recyclerViewBottom), -1, false);
+                    break;
+                default:
+                    break;
+            }
+        }
 
-        if ((top && possible[(pos + dx) % possible.length] == redPiece) || (!top && possible[(pos + dx) % possible.length] == bluePiece))
+// Move the selection in the given RecyclerView by the given amount
+// recycler: The RecyclerView to move the selection in
+// right: The amount to move the selection by (positive for right, negative for left)
+// top: Whether the RecyclerView is the top one (true) or the bottom one (false)
+        public void moveTheSelection(RecyclerView recycler, int right, boolean top) {
+// Get the layout manager for the RecyclerView
+            LinearLayoutManager layoutManager = (LinearLayoutManager) (recycler.getLayoutManager());
+            // Get the index of the first completely visible item and the amount to move the selection by
+            int pos = layoutManager.findFirstCompletelyVisibleItemPosition(), dx = right;
+
+// If the selection will land on a piece of the opposite color, double
+
+
+            if ((top && possible[(pos + dx) % possible.length] == redPiece) || (!top && possible[(pos + dx) % possible.length] == bluePiece))
             dx *= 2;
 
         int posOffset = 160;
@@ -445,39 +461,6 @@ public class ChooseActivity extends AppCompatActivity implements MyMenu {
         findViewById(R.id.bottomRightArrow).setAnimation(right);
         findViewById(R.id.topLeftArrow).setAnimation(left);
         findViewById(R.id.bottomLeftArrow).setAnimation(left);
-    }
-
-
-
-
-    private class onChange implements Runnable {
-
-        public onChange() {}
-
-        public void run() {
-            int i = 0;
-            for (int[][] hex : layouts) {
-                update(hex, boards[i]);
-                i++;
-            }
-        }
-
-        /*private void update(int[][] hex, ImageView[][] imageViews) {
-            int rows = 9, cols = 9;
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    int num = hex[i][j];
-                    if (num != 4 && imageViews[i][j] != null) {
-                        if (num == 1) {
-                            imageViews[i][j].setImageResource(bluePiece);
-                        }
-                        else if (num == -1) {
-                            imageViews[i][j].setImageResource(redPiece);
-                        }
-                    }
-                }
-            }
-        }*/
     }
 
     public void menuSetUp() {

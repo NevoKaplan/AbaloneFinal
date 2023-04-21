@@ -5,11 +5,13 @@ import java.util.Collections;
 
 public class Stone {
 
-    private int mainNum;
-    public int row, col;
-    public boolean isSelected;
-    private int ogNum;
+    // Instance variables
+    private int mainNum; // the main number of the stone
+    public int row, col; // the row and column of the stone
+    public boolean isSelected; // whether the stone is currently selected by the user
+    private int ogNum; // the original number of the stone
 
+    // Constructor with parameters
     public Stone(int mainNum, int row, int col) {
         this.mainNum = mainNum;
         this.row = row;
@@ -18,6 +20,7 @@ public class Stone {
         this.ogNum = mainNum;
     }
 
+    // Copy constructor
     public Stone(Stone stone) {
         this.mainNum = stone.mainNum;
         this.row = stone.row;
@@ -26,23 +29,43 @@ public class Stone {
         this.ogNum = this.mainNum;
     }
 
-    public int getMainNum() {return this.mainNum;}
+    // Getter for mainNum
+    public int getMainNum() {
+        return this.mainNum;
+    }
 
-    public void setMainNum(int num) {this.mainNum = num;}
+    // Setter for mainNum
+    public void setMainNum(int num) {
+        this.mainNum = num;
+    }
 
-    public int getOgNum() {return this.ogNum;}
+    // Getter for ogNum
+    public int getOgNum() {
+        return this.ogNum;
+    }
 
-    public void setOgNum(int num) {this.ogNum = num;}
+    // Setter for ogNum
+    public void setOgNum(int num) {
+        this.ogNum = num;
+    }
 
+    // Returns a string representation of the stone
     public String toString() {
         return this.mainNum + " [" + this.row + "]" + "[" + this.col + "]";
     }
 
-    public boolean getSelected() {return this.isSelected;}
+    // Getter for isSelected
+    public boolean getSelected() {
+        return this.isSelected;
+    }
 
-    public void setSelected(boolean bool) {this.isSelected = bool;}
+    // Setter for isSelected
+    public void setSelected(boolean bool) {
+        this.isSelected = bool;
+    }
 
-    public boolean isBefore(Stone stone) { // returns true if instance is before the parameter
+    // Checks if this stone is before the parameter stone
+    public boolean isBefore(Stone stone) {
         if (this.row < stone.row)
             return false;
         if (this.row == stone.row)
@@ -50,12 +73,14 @@ public class Stone {
         return true;
     }
 
+    // Checks if this stone is equal to the parameter stone
     public boolean equals(Stone stone) {
         return stone.col == this.col && stone.row == this.row;
     }
 
-    public static void sort(ArrayList<Stone> stones) { // NOT WORKING!!
-    int size = stones.size();
+    // Sorts the given ArrayList of stones using bubble sort (not working)
+    public static void sort(ArrayList<Stone> stones) {
+        int size = stones.size();
         for (int i = 0; i < size - 1; i++) {
             for (int j = 0; j < size - i - 1; j++) {
                 Stone current = stones.get(j);
@@ -73,10 +98,12 @@ public class Stone {
         }
     }
 
+    // Reverses the order of the given ArrayList of stones
     public static void reverseList(ArrayList<Stone> stones) {
         Collections.reverse(stones);
     }
 
+    // Returns an array with the row and column of the stone
     public int[] getPosition() {
         return new int[]{this.row, this.col};
     }

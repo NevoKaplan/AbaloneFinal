@@ -1,7 +1,5 @@
 package com.example.abalone.play.Logic;
 
-import android.util.Log;
-
 import com.example.abalone.play.Control.Control;
 import com.example.abalone.play.Control.Layouts;
 import com.example.abalone.play.GameActivity;
@@ -10,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Board {
-
-    //private static Board single_instance = null;
 
     protected int player;
     public Stone[][] hex;
@@ -231,10 +227,8 @@ public class Board {
             AIBoard aiBoard = ai.bestMove(tempBoard);
             ArrayList<Stone>[] madeMove = aiBoard.getMadeMove();
             Stone.reverseList(madeMove[0]);
-            this.mainActivity.runOnUiThread(() -> {
-                control.makeInvisible(madeMove[0], madeMove[1]);
-                updateBoardWithAI(aiBoard);
-            });
+            this.mainActivity.runOnUiThread(() -> control.makeInvisible(madeMove[0], madeMove[1]));
+            updateBoardWithAI(aiBoard);
             AiTurn = false;
         } // run()
     }
@@ -690,5 +684,7 @@ public class Board {
                 main.setOgNum(other.getOgNum());
             }
         }
+        this.deadRed = aiBoard.deadRed;
+        this.deadBlue = aiBoard.deadBlue;
     }
 }

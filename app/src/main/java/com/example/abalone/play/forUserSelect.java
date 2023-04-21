@@ -1,3 +1,9 @@
+// This code selects an image from the camera or the gallery
+// It creates a bitmap of the selected image and sets it as the current bitmap
+// It uses two ActivityResultLaunchers to launch the camera and gallery intents
+// It requests permissions if they are not granted
+// It shows a dialog to let the user choose between the camera and gallery
+
 package com.example.abalone.play;
 
 import android.Manifest;
@@ -6,7 +12,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -23,10 +28,14 @@ import com.example.abalone.play.Control.Control;
 import java.io.IOException;
 
 public class forUserSelect extends AppCompatActivity {
+    // Constants for requesting permissions and launching intents
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICK = 2;
+
+    // Bitmap to hold the selected image
     private Bitmap bitmapToGet;
 
+    // ActivityResultLaunchers for camera and gallery intents
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<Intent> galleryLauncher;
 
@@ -35,12 +44,12 @@ public class forUserSelect extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_for_user_select);
 
+        // Initialize the ActivityResultLaunchers
         cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Bundle extras = result.getData().getExtras();
                 Bitmap bitmap = (Bitmap)extras.get("data");
-
-                bitmapToGet = rotateAndFlipImage(bitmap);
+                bitmapToGet = bitmap;
             }
             finish();
         });
@@ -59,9 +68,11 @@ public class forUserSelect extends AppCompatActivity {
             finish();
         });
 
+        // Show the image selection dialog
         showImageDialog();
     }
 
+    // Shows a dialog to let the user choose between the camera and gallery
     private void showImageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Image");
@@ -69,6 +80,7 @@ public class forUserSelect extends AppCompatActivity {
         builder.setItems(new CharSequence[]{"Camera", "Gallery"}, (dialog, which) -> {
             switch (which) {
                 case 0:
+                    // Check for camera permission and launch the camera intent
                     if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -77,10 +89,12 @@ public class forUserSelect extends AppCompatActivity {
                             cameraLauncher.launch(takePictureIntent);
                         }
                     } else {
+                        // Request camera permission if it is not granted
                         requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
                     }
                     break;
                 case 1:
+                    // Check for gallery permission and launch the gallery intent
                     if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                         Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         galleryLauncher.launch(pickPhotoIntent);
@@ -109,17 +123,6 @@ public class forUserSelect extends AppCompatActivity {
             Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
             finish();
         }
-    }
-
-    private Bitmap rotateAndFlipImage(Bitmap bitmap) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(-90); // Rotate the image by 90 degrees
-        matrix.postScale(-1, 1); // Flip the image horizontally
-
-        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        bitmap.recycle(); // Free up memory used by the original bitmap
-
-        return rotatedBitmap;
     }
 
     @Override

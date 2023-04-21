@@ -12,7 +12,7 @@
 
     <item
         android:id="@+id/notification"
-        android:title="set notification"
+        android:title="Set Notification"
         android:orderInCategory="3"/>
 
     <item

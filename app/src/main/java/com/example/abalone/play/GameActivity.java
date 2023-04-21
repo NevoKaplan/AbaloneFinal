@@ -56,7 +56,7 @@ public class GameActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPref;
 
-    private User mainUser;
+    private User mainUser, guestUser;
 
     private Bitmap playerImgBitmap, guestImgBitmap;
 
@@ -124,6 +124,7 @@ public class GameActivity extends AppCompatActivity {
         menuSetUp();
 
         onResume();
+        ((TextView)findViewById(R.id.nameText)).setText(mainUser.getName() + "'s turn");
         if (AiTurn == 0)
             guestImgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
         else
@@ -442,6 +443,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void checkWin() {
+        System.out.println("I am here, blue: " + board.deadBlue + ", red: " + board.deadRed);
         if (board.deadBlue >= 6)
             showWin(-1);
         else if (board.deadRed >= 6)
@@ -461,14 +463,13 @@ public class GameActivity extends AppCompatActivity {
             winText = mainUser.getName() + " Won!!";
             imageView.setImageBitmap(mainUser.getImg());
             if (mainUser.getId() != -1) {
-                control.updateUserAndAddPoint();
+                control.updateUserAndAddPoint(player);
             }
         }
         else {
-            if (AiTurn != 0)
-                winText = "Bot Won!!";
-            else
-                winText = "Guest Won!!";
+            if (AiTurn == 0 && guestUser.getId() != -2)
+                control.updateUserAndAddPoint(player);
+            winText = guestUser.getName() + " Won!!";
             imageView.setImageBitmap(guestImgBitmap);
         }
 
@@ -487,10 +488,14 @@ public class GameActivity extends AppCompatActivity {
 
     private void changePlayerImage(int player) {
         ImageView imageView = findViewById(R.id.currentPlayer);
-        if (player == 1)
+        if (player == 1) {
             imageView.setImageBitmap(playerImgBitmap);
-        else
+            ((TextView)findViewById(R.id.nameText)).setText(mainUser.getName() + "'s turn");
+        }
+        else {
             imageView.setImageBitmap(guestImgBitmap);
+            ((TextView)findViewById(R.id.nameText)).setText(guestUser.getName() + "'s turn");
+        }
     }
 
     private int getRemovedPieceSize() {
@@ -633,10 +638,15 @@ public class GameActivity extends AppCompatActivity {
 
     @Override protected void onResume() {
         super.onResume();
-        mainUser = Control.getSelectedUser();
-        if (mainUser == null) {
+        mainUser = Control.getSelectedUser1();
+        if (mainUser == null)
             mainUser = new User("Player1", "", "someone@abalone.com", BitmapFactory.decodeResource(this.getResources(), R.drawable.hamar), 0, -1);
-        }
+        guestUser = Control.getSelectedUser2();
+        if (guestUser == null)
+            guestUser = new User("Guest", "", "someone@abalone.com", BitmapFactory.decodeResource(getResources(), R.drawable.default_image), 0, -2);
+        if (AiTurn != 0)
+            guestUser = new User("Bot", "", "bot@abalone.com", BitmapFactory.decodeResource(this.getResources(), R.drawable.robot_thinking), 0, -3);
         playerImgBitmap = mainUser.getImg();
+        guestImgBitmap = guestUser.getImg();
     }
 }
