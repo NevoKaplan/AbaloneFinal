@@ -258,10 +258,7 @@ public class GameActivity extends AppCompatActivity {
         int row = (int)view.getTag()/board.hex.length;
         int col = (int)view.getTag()%board.hex.length;
         if (!(board.selectedSize == 0 && board.hex[row][col].getMainNum() != board.getPlayer()) && AiTurn != 1) {
-            if (control.setCurrentStone(board.hex[row][col])) {
-
-            }
-            else {
+            if (!control.setCurrentStone(board.hex[row][col])) {
                 preUpdateBoard();
             }
         }
@@ -462,28 +459,27 @@ public class GameActivity extends AppCompatActivity {
         if (player == 1) {
             winText = mainUser.getName() + " Won!!";
             imageView.setImageBitmap(mainUser.getImg());
-            if (mainUser.getId() != -1) {
-                control.updateUserAndAddPoint(player);
-            }
         }
         else {
-            if (AiTurn == 0 && guestUser.getId() != -2)
-                control.updateUserAndAddPoint(player);
             winText = guestUser.getName() + " Won!!";
             imageView.setImageBitmap(guestImgBitmap);
         }
 
+        Context context = this;
         dialog.setTitle(winText);
-        dialog.findViewById(R.id.gloryButton).setOnClickListener(this::endActivity);
+        dialog.findViewById(R.id.gloryButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ChooseActivity.class);
+                if ((mainUser.getId() != -1 && player == 1) || (player == -1 && AiTurn == 0 && guestUser.getId() != -1))
+                    control.updateUserAndAddPoint(player);
+                startActivity(intent);
+                finish();
+            }
+        });
         ((TextView)dialog.findViewById(R.id.winText)).setText(winText);
         dialog.setCancelable(false);
         dialog.show();
-    }
-
-    private void endActivity(View view) {
-        Intent intent = new Intent(this, ChooseActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     private void changePlayerImage(int player) {
@@ -643,9 +639,9 @@ public class GameActivity extends AppCompatActivity {
             mainUser = new User("Player1", "", "someone@abalone.com", BitmapFactory.decodeResource(this.getResources(), R.drawable.hamar), 0, -1);
         guestUser = Control.getSelectedUser2();
         if (guestUser == null)
-            guestUser = new User("Guest", "", "someone@abalone.com", BitmapFactory.decodeResource(getResources(), R.drawable.default_image), 0, -2);
+            guestUser = new User("Guest", "", "someone@abalone.com", BitmapFactory.decodeResource(getResources(), R.drawable.default_image), 0, -1);
         if (AiTurn != 0)
-            guestUser = new User("Bot", "", "bot@abalone.com", BitmapFactory.decodeResource(this.getResources(), R.drawable.robot_thinking), 0, -3);
+            guestUser = new User("Bot", "", "bot@abalone.com", BitmapFactory.decodeResource(this.getResources(), R.drawable.robot_thinking), 0, -1);
         playerImgBitmap = mainUser.getImg();
         guestImgBitmap = guestUser.getImg();
     }

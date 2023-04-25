@@ -1,6 +1,5 @@
 package com.example.abalone.play;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;

@@ -125,7 +125,7 @@
         app:layout_constraintEnd_toEndOf="@+id/textView"
         app:layout_constraintStart_toStartOf="@+id/textView"
         app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:srcCompat="@drawable/sign_checked" />
+        app:srcCompat="@drawable/add_picture" />
 
     <ImageView
         android:id="@+id/reload"

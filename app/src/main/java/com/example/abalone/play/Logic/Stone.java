@@ -78,7 +78,7 @@ public class Stone {
         return stone.col == this.col && stone.row == this.row;
     }
 
-    // Sorts the given ArrayList of stones using bubble sort (not working)
+    // Sorts the given ArrayList of stones using bubble sort
     public static void sort(ArrayList<Stone> stones) {
         int size = stones.size();
         for (int i = 0; i < size - 1; i++) {

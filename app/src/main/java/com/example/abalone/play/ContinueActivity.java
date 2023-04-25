@@ -22,21 +22,16 @@ public class ContinueActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.continue_layout);  // Sets the layout for this activity
         createNotificationChannel();  // Calls method to create notification channel
-
         // Loads the SharedPreferences object with the name "my_prefs"
         SharedPreferences sharedPref = getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
-
         // String to be used if no saved game board exists
         String noState = getString(R.string.no_board_state);
-
         // Prints the saved board state, or the "no board state" message if none exists
         System.out.println("This: " + sharedPref.getString(getString(R.string.saved_board_state), noState));
-
         // If there is no saved game board state, start a new game
         if (sharedPref.getString(getString(R.string.saved_board_state), noState).equals(noState)) {
             newGame();
         }
-
         menuSetUp();  // Calls method to set up menu
         (findViewById(R.id.continueOld)).setOnClickListener(this::continueGame);  // Sets up listener for "continue game" button
         (findViewById(R.id.newGame)).setOnClickListener(this::beforeNewGame);  // Sets up listener for "new game" button

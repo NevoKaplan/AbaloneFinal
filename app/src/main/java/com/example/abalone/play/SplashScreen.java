@@ -25,13 +25,10 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-
         // Initialize variables and animations
         init();
-
         // Create a new handler
         handler = new Handler();
-
         // Post a delayed Runnable to start the ContinueActivity after 2 seconds
         handler.postDelayed(new Runnable() {
             @Override
@@ -46,7 +43,6 @@ public class SplashScreen extends AppCompatActivity {
         findViewById(R.id.splash_screen_layout).setOnClickListener(v -> {
             // Remove the delayed code from the Handler's queue
             handler.removeCallbacksAndMessages(null);
-
             // Start the activity
             Intent intent = new Intent(SplashScreen.this, ContinueActivity.class);
             startActivity(intent);

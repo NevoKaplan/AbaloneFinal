@@ -166,21 +166,15 @@ public class Board {
     public boolean makeMove(Stone Stone_ish) {
 
         boolean pushedTroops = false;
-
             // select stone
-
         try {
             if (Stone_ish.getMainNum() == player) {
                 if (!choosePiece(Stone_ish, move2)) { // if false cleans selected and chooses the new one
                     cleanSelected();
                     changeSelected(Stone_ish);
                 }
-
-
                 targets = availableTargets();
                 move2 = availableStones2();
-
-
             }
             else if ((Stone_ish.getMainNum() == player * -1 || Stone_ish.getMainNum() == 0) && !selected.isEmpty()) { // if chose wrong stone and is allowed to
                 pushedTroops = pushTroops(targets, Stone_ish);  // push the stone
@@ -190,13 +184,11 @@ public class Board {
             }
         } catch (ArrayIndexOutOfBoundsException e) { // if chosen is out of bounds or anything unexpected happens within the loop
             }
-
         return pushedTroops;
     }
 
     public boolean CheckAndMoveAI(int goAhead) {
         if (goAhead == 1 && AI.hasInstance()) {
-
             ai = AI.getInstance(player * -1);
             AiTurn = true;
             player *= -1;
@@ -204,7 +196,6 @@ public class Board {
                 control = Control.getInstance();
             AiThread aiThread = new AiThread(this, control.getGameUI());
             aiThread.start();
-
             return true;
         }
         else {

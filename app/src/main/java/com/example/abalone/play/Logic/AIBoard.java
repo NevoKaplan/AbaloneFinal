@@ -13,9 +13,7 @@ public class AIBoard extends Board {
     private int val;
     private int preDeadRed, preDeadBlue;
     private ArrayList<Stone>[] madeMove = new ArrayList[2];
-    public static int run = 0;
-    public boolean sideMoveable;
-    private ArrayList<Stone[][]> alreadyBoards;
+    private final ArrayList<Stone[][]> alreadyBoards;
     private int amountOfStonesMoved;
 
     // A 2D integer array fromMiddle with predefined values
@@ -54,15 +52,12 @@ public class AIBoard extends Board {
         deadBlue = board.deadBlue;
         // Sets deadRed attribute
         deadRed = board.deadRed;
-        // Sets sideMoveable attribute to false
-        sideMoveable = false;
         // Sets AiTurn attribute to true
         this.AiTurn = true;
     }
 
     public AIBoard(AIBoard board) {  // constructor that takes an instance of AIBoard class as a parameter
         super(false, -1);  // calls the constructor of the superclass and passes two parameters to it
-        run++;  // increments the value of the static variable "run" by 1
         updateBoard(board.hex);  // calls the method "updateBoard" with the "hex" field of the parameter object as an argument
         this.player = board.player;  // assigns the value of the "player" field of the parameter object to the "player" field of the current object
         this.depth = board.depth - 1;  // assigns the value of the "depth" field of the parameter object decremented by 1 to the "depth" field of the current object
@@ -74,7 +69,6 @@ public class AIBoard extends Board {
         deadBlue = board.deadBlue;  // assigns the value of the "deadBlue" field of the parameter object to the "deadBlue" field of the current object
         deadRed = board.deadRed;  // assigns the value of the "deadRed" field of the parameter object to the "deadRed" field of the current object
         alreadyBoards = new ArrayList<>();  // creates a new ArrayList object and assigns it to the "alreadyBoards" field of the current object
-        sideMoveable = false;  // assigns the value false to the "sideMoveable" field of the current object
         this.AiTurn = true;  // assigns the value true to the "AiTurn" field of the current object
     }
 
@@ -317,11 +311,9 @@ public class AIBoard extends Board {
 // adds the moved stone to the madeMove array list
         this.madeMove[1].add(new Stone(moveTo));
 
-// checks if a side move exists and sets the sideMoveable variable accordingly
-        if (beforeSideMove(moveTo)) {
-            this.sideMoveable = true;
+// checks if a side move exists
+        if (beforeSideMove(moveTo))
             return;
-        }
 
         shouldReverse2(reverse);
 

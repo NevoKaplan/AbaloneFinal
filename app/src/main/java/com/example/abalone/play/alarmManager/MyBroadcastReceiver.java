@@ -38,10 +38,8 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         // Add FLAG_IMMUTABLE flag to the PendingIntent to prevent modification
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE);
-
         // Load the Abalone game icon as a Bitmap
         Bitmap iconBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.abalone_logo_round);
-
         // Build the notification using the NotificationCompat.Builder
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "default_channel")
                 .setSmallIcon(R.drawable.abalone_logo_round) // Set the small icon for the notification
@@ -51,7 +49,6 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT) // Set the priority for the notification
                 .setContentIntent(pendingIntent) // Set the PendingIntent to be triggered when the notification is clicked
                 .setAutoCancel(true); // Automatically dismiss the notification when the user clicks on it
-
         // Get the NotificationManagerCompat object and use it to notify the user
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(1, builder.build()); // The first argument is the notification id, which should be unique for each notification
