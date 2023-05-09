@@ -103,30 +103,6 @@ public class AIBoard extends Board {
         return this.madeMove;
     }
 
-    // Set the best selected stones
-    public void setBestSelected(ArrayList<Stone> selected, ArrayList<Stone> toBe) {
-        // Add each stone in the selected list to the first arraylist of madeMove
-        for (Stone stone : selected) {
-            this.madeMove[0].add(stone);
-        }
-        // Add each stone in the toBe list to the second arraylist of madeMove
-        for (Stone stone : toBe) {
-            this.madeMove[1].add(stone);
-        }
-    }
-
-    // Overload the setBestSelected method
-    public void setBestSelected() {
-        // Add each stone in the selected list to the first arraylist of madeMove
-        for (Stone stone : this.selected) {
-            this.madeMove[0].add(stone);
-        }
-        // Add each stone in the toBe list to the second arraylist of madeMove
-        for (Stone stone : this.toBe) {
-            this.madeMove[1].add(stone);
-        }
-    }
-
     // Get the next possible boards for the current player
     public ArrayList<AIBoard>[] getNextBoards(int currentPlayer) {
         // Set the current player
@@ -237,7 +213,6 @@ public class AIBoard extends Board {
         // Return the array of boards that contains all the possible moves
         return boards;
     }
-
     /**
 
      This method finds all possible moves given a starting position and amount of stones to move.
@@ -347,12 +322,8 @@ public class AIBoard extends Board {
     }
 
     public int evaluate(int amount) {
-        // Commented out System.out.println statement
         // This method evaluates the current board and returns a score based on the current state of the board.
-
-        // Initialize the sum variable to 1
         int sum = 1;
-
         // Loop through every element in the hex array
         for (int i = 0; i < hex.length; i++) {
             for (int j = 0; j < hex[i].length; j++) {
@@ -363,7 +334,6 @@ public class AIBoard extends Board {
                 }
             }
         }
-
         // Check the amount of stones that are left
         switch (amount) {
             // If there are 2 stones left, add 10 to the sum variable
@@ -377,12 +347,9 @@ public class AIBoard extends Board {
             default:
                 break;
         }
-
         // Check the number of dead blue stones
         int deadB = deadBlue - preDeadBlue;
         if (deadB >= 1) {
-            // Print a debug statement
-            System.out.println("IT DOES WORK1");
             if (player == -1) {
                 // Multiply the sum variable by 10 times the number of dead blue stones
                 sum *= 12 * deadB;
@@ -391,12 +358,9 @@ public class AIBoard extends Board {
                 sum /= 5 * deadB;
             }
         }
-
         // Check the number of dead red stones
         int deadR = deadRed - preDeadRed;
         if (deadR >= 1) {
-            // Print a debug statement
-            System.out.println("IT DOES WORK2");
             if (player == 1) {
                 // Multiply the sum variable by 10 times the number of dead red stones
                 sum *= 12 * deadR;
@@ -405,7 +369,6 @@ public class AIBoard extends Board {
                 sum /= 5 * deadR;
             }
         }
-
         // Multiply the sum variable by the current player
         return sum * player;
     }

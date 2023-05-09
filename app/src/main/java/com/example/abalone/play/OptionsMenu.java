@@ -70,34 +70,31 @@ public class OptionsMenu extends PopupMenu {
         totalTime = 0;
 
         // Listener for when the user sets the time in the dialog
-        TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                totalTime += selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000;
-                hour = selectedHour;
-                minute = selectedMinute;
+        TimePickerDialog.OnTimeSetListener onTimeSetListener = (timePicker, selectedHour, selectedMinute) -> {
+            totalTime += selectedHour * 60 * 60 * 1000 + selectedMinute * 60 * 1000;
+            hour = selectedHour;
+            minute = selectedMinute;
 
-                // Set up the alarm manager to send a notification at the specified time
-                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                Intent intent = new Intent(context, MyBroadcastReceiver.class);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + totalTime, pendingIntent);
+            // Set up the alarm manager to send a notification at the specified time
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(context, MyBroadcastReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + totalTime, pendingIntent);
 
-                // Show a toast to confirm the time that the notification will be sent
-                String toastText = "A notification will be sent in ";
-                if (hour == 1)
-                    toastText += hour + " hour and ";
-                else if (hour > 0)
-                    toastText += hour + " hours and ";
-                if (minute == 1)
-                    toastText += minute + " minute";
-                else if (minute > 0)
-                    toastText += minute + " minutes";
-                else if (hour == 0)
-                    toastText += "a few seconds";
+            // Show a toast to confirm the time that the notification will be sent
+            String toastText = "A notification will be sent in ";
+            if (hour == 1)
+                toastText += hour + " hour and ";
+            else if (hour > 0)
+                toastText += hour + " hours and ";
+            if (minute == 1)
+                toastText += minute + " minute";
+            else if (minute > 0)
+                toastText += minute + " minutes";
+            else if (hour == 0)
+                toastText += "a few seconds";
 
-                Toast.makeText(context, toastText, Toast.LENGTH_LONG).show();
-            }
+            Toast.makeText(context, toastText, Toast.LENGTH_LONG).show();
         };
         TimePickerDialog timePickerDialog = new TimePickerDialog(context, onTimeSetListener, hour, minute, true);
 

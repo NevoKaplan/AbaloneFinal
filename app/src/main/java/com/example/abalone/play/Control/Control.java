@@ -111,16 +111,6 @@ public class Control {
         return this.board;
     }
 
-    // Method for handling changes in AI state
-    public void onCheckedChanged(boolean isChecked) {
-        if (isChecked) {
-            AI.getInstance(board.getPlayer() * -1);
-        }
-        else {
-            AI.removeInstance();
-        }
-    }
-
     /**
      * Returns whether a single instance of this class exists.
      */

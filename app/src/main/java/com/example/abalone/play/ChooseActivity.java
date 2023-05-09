@@ -428,16 +428,14 @@ public class ChooseActivity extends AppCompatActivity {
             int pos = layoutManager.findFirstCompletelyVisibleItemPosition(), dx = right;
 
 // If the selection will land on a piece of the opposite color, double
-
-
             if ((top && possible[(pos + dx) % possible.length] == redPiece) || (!top && possible[(pos + dx) % possible.length] == bluePiece))
-            dx *= 2;
+                dx *= 2;
 
-        int posOffset = 160;
+            int posOffset = 160;
 
-        System.out.println("pos: " + pos + ", posWithIndex: " + (pos + dx));
-        prechange(top, pos + dx);
-        layoutManager.scrollToPositionWithOffset(pos + dx, posOffset);
+            System.out.println("pos: " + pos + ", posWithIndex: " + (pos + dx));
+            prechange(top, pos + dx);
+            layoutManager.scrollToPositionWithOffset(pos + dx, posOffset);
     }
 
     public void prechange(boolean top, int index) {

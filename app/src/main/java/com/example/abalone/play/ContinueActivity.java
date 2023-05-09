@@ -26,8 +26,6 @@ public class ContinueActivity extends AppCompatActivity {
         SharedPreferences sharedPref = getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
         // String to be used if no saved game board exists
         String noState = getString(R.string.no_board_state);
-        // Prints the saved board state, or the "no board state" message if none exists
-        System.out.println("This: " + sharedPref.getString(getString(R.string.saved_board_state), noState));
         // If there is no saved game board state, start a new game
         if (sharedPref.getString(getString(R.string.saved_board_state), noState).equals(noState)) {
             newGame();

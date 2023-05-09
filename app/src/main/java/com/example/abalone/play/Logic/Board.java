@@ -63,11 +63,6 @@ public class Board {
         hex = tempHex;
         if (first) {
 
-            /*do {
-                System.out.print("Choose Starting Form: \n1. Normal\n2. German Daisy\n3. Snakes\n4. Crowns\nEnter Number: ");
-                num = in.nextInt();
-            } while (num < 1 || num > 5);*/
-
             int[][] placeAcc;
             switch (num) {
                 case 2:
@@ -99,28 +94,7 @@ public class Board {
         }
     }
 
-    public void print() {
-        StringBuilder space = new StringBuilder("          ");
-        for (int i = 0; i < this.hex.length; i++) {
-            for (int j = 0; j < this.hex[i].length; j++) {
-                if (this.hex[i][j].getMainNum() != 4) {
-                    if (this.hex[i][j].getSelected())
-                        System.out.print(space + " " + 3 + "  ");
-                    else if (this.hex[i][j].getMainNum() == -1)
-                        System.out.print(space + " " + 2 + "  ");
-                    else
-                        System.out.print(space + " " +this.hex[i][j].getMainNum() + "  ");
-                    space = new StringBuilder();
-                }
-                else if (this.hex[i][j].getMainNum() == 4)
-                    space.append("  ");
-            }
-            if (i >= this.hex.length/2)
-                space.append("  ");
-            System.out.println();
-        }
-    }
-
+    // organize board according to placeAcc
     public void organize(int[][] placeAcc) {
         int redAmount = 14, blueAmount = 14;
         for (int i = 0; i < placeAcc.length; i++) {
@@ -137,6 +111,7 @@ public class Board {
         this.deadRed = redAmount;
     }
 
+    // turns stone array to int array
     public int[][] turnStoneToIntArr() {
         int[][] newHex = new int[9][9];
         for (int i = 0; i < hex.length; i++) {
@@ -146,21 +121,6 @@ public class Board {
         }
         return newHex;
     }
-
-    // stones layout
-    private void organizeNormal() {
-        int troops = 14;
-        for (int i = 0; i < hex.length; i++) {
-            for (int j = 0; j < hex[i].length; j++) {
-                if (((((i == 2) && (j > 1 && j < 5)) || i == 6 && (j > 2 && j <= 6)) || (i < 2 || i > 6)) && hex[i][j].getMainNum() != 4) {
-                    if (troops != 0) {
-                        hex[i][j].setMainNum(troops / Math.abs(troops)); }
-                    troops--;
-                }
-            }
-        }
-    }
-
 
     // the "main" function
     public boolean makeMove(Stone Stone_ish) {
@@ -375,14 +335,6 @@ public class Board {
 
     // side move stones
     protected void sideMove(int drow, int dcol) {
-        /*if ((drow >= 1 && dcol <= -1) || (drow <= -1 && dcol >= 1)) { // a second check because of the AI
-            Stone.reverseList(selected);
-            Stone last = selected.get(selectedSize - 1);
-            Stone moveTo = this.toBe.get(0);
-            drow = (moveTo.row - last.row);
-            dcol = (moveTo.col - last.col);
-        }*/
-
         for (Stone temp : selected) {
 
             int num = hex[temp.row + drow][temp.col + dcol].getMainNum();
@@ -438,7 +390,7 @@ public class Board {
                 if (hex[temp.row + var[0]][temp.col + var[1]].getMainNum() == 0) {
                     targets.add(hex[temp.row + var[0]][temp.col + var[1]]);
                 }
-            } catch (IndexOutOfBoundsException e) {
+            } catch (IndexOutOfBoundsException ignored) {
             }
 
             catch (Exception e) {
@@ -548,8 +500,7 @@ public class Board {
                     arrayList.add(hex[temp.row + 2 * var[0]][temp.col + 2 * var[1]]);
                 }
             }
-            catch (IndexOutOfBoundsException e) {
-
+            catch (IndexOutOfBoundsException ignored) {
             }
             catch (Exception e) {System.out.println(e.getMessage());}
         }
@@ -641,7 +592,7 @@ public class Board {
         selectedSize += toBe.size();
     }
 
-    protected boolean changeSelected(Stone stone) {
+    protected void changeSelected(Stone stone) {
         stone.isSelected = !stone.isSelected;
         if (stone.isSelected) {
             selected.add(stone);
@@ -652,7 +603,6 @@ public class Board {
             selectedSize--;
         }
         Stone.sort(selected);
-        return stone.isSelected;
     }
 
     public ArrayList<Stone> getSelected() {

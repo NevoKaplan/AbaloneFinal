@@ -40,7 +40,6 @@ public class UserAdapter extends ArrayAdapter<User> {
     // Override getView method to customize how the data is displayed in each row of the list view
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-
         // If convertView is null, inflate the custom_row layout and create a ViewHolder object to hold the row's views
         if (convertView == null) {
             LayoutInflater layoutInflater = ((Activity) context).getLayoutInflater();
@@ -53,38 +52,25 @@ public class UserAdapter extends ArrayAdapter<User> {
             holder.trashCan = convertView.findViewById(R.id.trashCan);
             convertView.setTag(holder);
         }
-
         // If convertView is not null, retrieve the ViewHolder object from its tag
         else {
             holder = (ViewHolder) convertView.getTag();
         }
-
         // Retrieve the User object for the current position
         User temp = objects.get(position);
-
         // Set the name TextView to display the user's full name
         String fullName = (temp.getName() + " " + temp.getSurname()).trim();
         holder.name.setText(fullName);
-
         // Set the wins TextView to display the number of games the user has won
         String winAmount = "Won " + temp.getWins() + " Games";
         holder.wins.setText(winAmount);
-
         // Scale and set the user's profile image in the ImageView
         scaleImage(holder.imageView, temp.getImg());
-
         // Set the id TextView to display the user's ID
         long id = temp.getId();
         holder.id.setText(id + "");
-
         // Set an onClickListener for the trash can ImageView to delete the current user from the database
-        holder.trashCan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createSureDialog(fullName, id, position);
-            }
-        });
-
+        holder.trashCan.setOnClickListener(view -> createSureDialog(fullName, id, position));
         return convertView;
     }
 

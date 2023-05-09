@@ -155,10 +155,7 @@ public class UserTable extends SQLiteOpenHelper {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         copy.compress(Bitmap.CompressFormat.JPEG, 70, stream);
         byte[] byteArray = stream.toByteArray();
-        System.out.println("Bitmap (UserTable Temp): " + temp.getHeight() + ", " + temp.getWidth());
-        System.out.println("Bitmap (UserTable Copy): " + copy.getHeight() + ", " + copy.getWidth());
         values.put(UserTable.COLUMN_IMAGE, byteArray);
-        System.out.println("database: " + database);
         this.open();
         // Insert the new user into the user table and get the insert ID.
         long insertid = database.insert(UserTable.TABLE_PRODUCT, null, values);
